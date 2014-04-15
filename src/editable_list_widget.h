@@ -39,7 +39,6 @@
 #define EDITABLE_LIST_WIDGET_H
 
 #include <QtWidgets/QListWidget>
-class QModelIndex;
 
 class EditableListWidget : public QListWidget
 {
@@ -48,15 +47,11 @@ class EditableListWidget : public QListWidget
 public:
   EditableListWidget(QWidget* parent = NULL);
 
-  const QString& itemName() const;
-  void setItemName(const QString& itemName);
-
 private slots:
   void onItemButtonClicked(int btnId, const QModelIndex& index);
 
 private:
   QString m_itemName;
-  QListWidgetItem* m_btnAddItem;
 };
 
 #endif // EDITABLE_LIST_WIDGET_H

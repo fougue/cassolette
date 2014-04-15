@@ -37,33 +37,24 @@
 
 #include "editable_list_widget.h"
 
-#include <QtWidgets/QPushButton>
 #include <fougtools/qttools/gui/item_view_buttons.h>
 
 EditableListWidget::EditableListWidget(QWidget *parent)
-  : QListWidget(parent),
-    m_btnAddItem(NULL)
+  : QListWidget(parent)
 {
   qttools::ItemViewButtons* itemBtns = new qttools::ItemViewButtons(this, this);
+
+  QIcon removeIcon;
+  removeIcon.addPixmap(QPixmap(":/images/list-remove.png"), QIcon::Normal);
+  removeIcon.addPixmap(QPixmap(":/images/list-remove_active.png"), QIcon::Active);
+
   itemBtns->installDefaultItemDelegate();
   itemBtns->addButton(0);
-  itemBtns->setButtonIcon(0, QPixmap(":/images/list-remove.png"));
+  gitemBtns->setButtonIcon(0, removeIcon);
   itemBtns->setButtonToolTip(0, tr("Delete item"));
   itemBtns->setButtonDetection(0, -1, QVariant());
   QObject::connect(itemBtns, SIGNAL(buttonClicked(int,QModelIndex)),
                    this, SLOT(onItemButtonClicked(int,QModelIndex)));
-}
-
-const QString &EditableListWidget::itemName() const
-{
-  return m_itemName;
-}
-
-void EditableListWidget::setItemName(const QString &itemName)
-{
-  m_itemName = itemName;
-  QPushButton* btnAdd = qobject_cast<QPushButton*>(this->itemWidget(m_btnAddItem));
-  btnAdd->setText(tr("Add %1").arg(itemName));
 }
 
 void EditableListWidget::onItemButtonClicked(int btnId, const QModelIndex &index)
