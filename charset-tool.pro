@@ -33,3 +33,6 @@ include(src/3rdparty/ucsd/ucsd.pri)
 
 # FougTools
 include(src/3rdparty/fougtools/qttools/qttools.pri)
+
+
+OTHER_FILES += readme.md
