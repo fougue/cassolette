@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/list-add.png</file>
+        <file>images/list-remove.png</file>
+        <file>images/view-filter.png</file>
+        <file>images/system-run.png</file>
+        <file>images/process-stop.png</file>
+        <file>images/document-new.png</file>
+        <file>images/folder-new.png</file>
+    </qresource>
+</RCC>
