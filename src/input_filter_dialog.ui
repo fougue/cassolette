@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>742</width>
-    <height>194</height>
+    <width>770</width>
+    <height>260</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,6 +66,13 @@
      <item>
       <widget class="EditableListWidget" name="filterListWidget"/>
      </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Example: *.h</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="0" column="1">
@@ -119,6 +126,13 @@
      </item>
      <item>
       <widget class="EditableListWidget" name="excludeListWidget"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Example: */.git/*</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

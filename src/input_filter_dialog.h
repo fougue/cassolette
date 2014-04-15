@@ -40,19 +40,30 @@
 
 #include <QtWidgets/QDialog>
 
+struct InputFilterDialog_FilePatterns
+{
+  InputFilterDialog_FilePatterns();
+  QStringList appliablePatterns() const;
+
+  QStringList patterns;
+  bool checked;
+};
+
 class InputFilterDialog : public QDialog
 {
   Q_OBJECT
 
 public:
+  typedef InputFilterDialog_FilePatterns FilePatterns;
+
   InputFilterDialog(QWidget *parent = NULL);
   ~InputFilterDialog();
 
-  void installFilterPatterns(const QStringList& patterns);
-  QStringList filterPatterns() const;
+  void installFilterPatterns(const FilePatterns& fp);
+  FilePatterns filterPatterns() const;
 
-  void installExcludePatterns(const QStringList& patterns);
-  QStringList excludePatterns() const;
+  void installExcludePatterns(const FilePatterns& fp);
+  FilePatterns excludePatterns() const;
 
 private slots:
   void addFilterPattern();

@@ -40,6 +40,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "editable_list_widget.h"
+#include "input_filter_dialog.h"
 class CharsetDetector;
 class QProgressBar;
 
@@ -70,8 +71,8 @@ private:
   QString m_lastInputDir;
   QProgressBar* m_analyseProgressBar;
   CharsetDetector* m_csDetector;
-  QStringList m_filterPatterns;
-  QStringList m_excludePatterns;
+  InputFilterDialog::FilePatterns m_filterPatterns;
+  InputFilterDialog::FilePatterns m_excludePatterns;
 };
 
 #endif // CHARSET_TOOL_MAIN_WINDOW_H

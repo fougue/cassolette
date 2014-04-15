@@ -119,18 +119,20 @@ void CharsetToolMainWindow::runAnalyse()
   for (int row = 0; row < inputCount; ++row)
     inputList += m_ui->inputListWidget->item(row)->text();
 
-  const CharsetDetector::ListFilesResult listFilesRes = CharsetDetector::listFiles(inputList,
-                                                                                   m_filterPatterns,
-                                                                                   m_excludePatterns);
+  const auto listFilesRes = CharsetDetector::listFiles(inputList,
+                                                       m_filterPatterns.appliablePatterns(),
+                                                       m_excludePatterns.appliablePatterns());
   foreach (const QString& err, listFilesRes.errors)
-    qDebug() << err;
+    qWarning() << err;
 
   if (!listFilesRes.files.isEmpty()) {
     this->updateAnalyseControlButtons(true);
 
     m_analyseProgressBar = new QProgressBar;
     m_analyseProgressBar->setMaximum(listFilesRes.files.size());
-    this->statusBar()->addWidget(m_analyseProgressBar);
+    this->statusBar()->addPermanentWidget(m_analyseProgressBar);
+    m_analyseProgressBar->show();
+    this->statusBar()->showMessage(tr("Analysing ..."));
 
     m_csDetector->asyncDetect(listFilesRes.files);
   }
@@ -158,6 +160,7 @@ void CharsetToolMainWindow::onAnalyseEnded()
 {
   this->updateAnalyseControlButtons(false);
   this->statusBar()->removeWidget(m_analyseProgressBar);
+  this->statusBar()->showMessage(tr("Ready"));
 }
 
 void CharsetToolMainWindow::updateAnalyseControlButtons(bool analyseIsRunning)
