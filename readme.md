@@ -7,6 +7,9 @@ encoding of text files.
 To detect file encoding, charset-tool internally uses the Mozilla's Universal Character Set Detector
 library (UCSD for short).
 
+Code source of Mozilla's UCSD library was taken from :
+  https://github.com/batterseapower/libcharsetdetect
+
 How To Build
 ------------
 
@@ -15,11 +18,13 @@ If you don't have Qt yet, pre-compiled binaries can be downloaded at http://qt-p
 
 Once Qt built or installed with a pre-compiled package, then type these commands from the root
 directory of charset-tool :
-    $> qmake
-    $> (n)make
+
+    qmake
+    (n)make
 
 License
 -------
+
 charset-tool is available under CeCILL-B which is a BSD-like license. For more information, please
 see http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html
 
