@@ -3,7 +3,8 @@ TEMPLATE = app
 QT     += widgets concurrent
 CONFIG += c++11
 
-TARGET = charset-tool \
+TARGET = charset-tool
+debug:TARGET = $$join(TARGET, , , _d)
 
 INCLUDEPATH += src \
                src/3rdparty
@@ -14,7 +15,8 @@ HEADERS += \
     src/editable_list_widget.h \
     src/charset_detector.h
 
-SOURCES += src/main.cpp \
+SOURCES += \
+    src/main.cpp \
     src/charset_tool_main_window.cpp \
     src/input_filter_dialog.cpp \
     src/editable_list_widget.cpp \
@@ -24,8 +26,7 @@ FORMS += \
     src/charset_tool_main_window.ui \
     src/input_filter_dialog.ui
 
-RESOURCES += \
-    charset-tool.qrc
+RESOURCES += charset-tool.qrc
 
 
 # Mozilla Universal Character Set Detector library
