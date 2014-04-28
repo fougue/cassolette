@@ -67,6 +67,19 @@ private slots:
 private:
   void updateAnalyseControlButtons(bool analyseIsRunning);
 
+  enum LogFormat
+  {
+    InfoLog,
+    WarningLog,
+    ErrorLog
+  };
+
+  void clearLog();
+  void appendLogInfo(const QString& msg);
+  void appendLogWarning(const QString& msg);
+  void appendLogError(const QString& msg);
+  void appendLog(const QString& msg, LogFormat format);
+
   class Ui_CharsetToolMainWindow *m_ui;
   QString m_lastInputDir;
   QProgressBar* m_analyseProgressBar;

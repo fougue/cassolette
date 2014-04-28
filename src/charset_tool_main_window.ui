@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>745</width>
-    <height>522</height>
+    <width>775</width>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -197,7 +197,7 @@
            </property>
            <property name="icon">
             <iconset resource="../charset-tool.qrc">
-             <normaloff>:/images/system-run.png</normaloff>:/images/system-run.png</iconset>
+             <normaloff>:/images/document-edit-verify.png</normaloff>:/images/document-edit-verify.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -210,26 +210,87 @@
         </layout>
        </item>
        <item>
-        <widget class="QTreeWidget" name="analyseTreeWidget">
-         <property name="rootIsDecorated">
-          <bool>false</bool>
+        <widget class="QTabWidget" name="tabWidget">
+         <property name="tabPosition">
+          <enum>QTabWidget::South</enum>
          </property>
-         <property name="sortingEnabled">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <property name="documentMode">
           <bool>true</bool>
          </property>
-         <property name="columnCount">
-          <number>2</number>
-         </property>
-         <column>
-          <property name="text">
-           <string>Encoding</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>File Path</string>
-          </property>
-         </column>
+         <widget class="QWidget" name="pageFiles">
+          <attribute name="title">
+           <string>Files</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QTreeWidget" name="analyseTreeWidget">
+             <property name="rootIsDecorated">
+              <bool>false</bool>
+             </property>
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="columnCount">
+              <number>2</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>Encoding</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>File Path</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="pageLog">
+          <attribute name="title">
+           <string>Log</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPlainTextEdit" name="logTextEdit">
+             <property name="undoRedoEnabled">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -242,7 +303,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>745</width>
+     <width>775</width>
      <height>20</height>
     </rect>
    </property>

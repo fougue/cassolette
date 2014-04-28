@@ -8,5 +8,6 @@
         <file>images/document-new.png</file>
         <file>images/folder-new.png</file>
         <file>images/list-remove_active.png</file>
+        <file>images/document-edit-verify.png</file>
     </qresource>
 </RCC>

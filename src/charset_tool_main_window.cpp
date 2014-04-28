@@ -39,12 +39,31 @@
 
 #include <QtCore/QtDebug>
 #include <QtCore/QFileInfo>
+#include <QtCore/QTime>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QProgressBar>
+#include <QtWidgets/QScrollBar>
 
 #include "charset_detector.h"
 #include "input_filter_dialog.h"
 #include "ui_charset_tool_main_window.h"
+
+namespace internal {
+
+static QColor mixColors(const QColor& a, const QColor& b)
+{
+  return QColor((a.red()   + 2 * b.red())   / 3,
+                (a.green() + 2 * b.green()) / 3,
+                (a.blue()  + 2 * b.blue())  / 3,
+                (a.alpha() + 2 * b.alpha()) / 3);
+}
+
+static QString currentTimeLogText()
+{
+  return QTime::currentTime().toString(Qt::DefaultLocaleShortDate);
+}
+
+} // namespace internal
 
 CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
   : QMainWindow(parent),
@@ -61,12 +80,14 @@ CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
   QObject::connect(m_ui->runAnalyseBtn, SIGNAL(clicked()), this, SLOT(runAnalyse()));
   QObject::connect(m_ui->stopAnalyseBtn, SIGNAL(clicked()), this, SLOT(stopAnalyse()));
 
-  QObject::connect(m_csDetector, SIGNAL(detection(QString,QString)),
-                   this, SLOT(onAnalyseDetection(QString,QString)));
-  QObject::connect(m_csDetector, SIGNAL(error(QString,QString)),
-                   this, SLOT(onAnalyseError(QString,QString)));
-  QObject::connect(m_csDetector, SIGNAL(detectEnded()), this, SLOT(onAnalyseEnded()));
+  QObject::connect(m_csDetector, &CharsetDetector::detection,
+                   this, &CharsetToolMainWindow::onAnalyseDetection);
+  QObject::connect(m_csDetector, &CharsetDetector::error,
+                   this, &CharsetToolMainWindow::onAnalyseError);
+  QObject::connect(m_csDetector, &CharsetDetector::detectEnded,
+                   this, &CharsetToolMainWindow::onAnalyseEnded);
 
+  m_ui->tabWidget->setCurrentWidget(m_ui->pageFiles);
   this->statusBar()->showMessage(tr("Ready"));
   this->updateAnalyseControlButtons(false);
 }
@@ -114,6 +135,8 @@ void CharsetToolMainWindow::runAnalyse()
 {
   m_ui->analyseTreeWidget->clear();
 
+  this->appendLogInfo(tr("Analysis started"));
+
   QStringList inputList;
   const int inputCount = m_ui->inputListWidget->count();
   for (int row = 0; row < inputCount; ++row)
@@ -123,7 +146,7 @@ void CharsetToolMainWindow::runAnalyse()
                                                        m_filterPatterns.appliablePatterns(),
                                                        m_excludePatterns.appliablePatterns());
   foreach (const QString& err, listFilesRes.errors)
-    qWarning() << err;
+    this->appendLogError(err);
 
   if (!listFilesRes.files.isEmpty()) {
     this->updateAnalyseControlButtons(true);
@@ -136,6 +159,8 @@ void CharsetToolMainWindow::runAnalyse()
 
     m_csDetector->asyncDetect(listFilesRes.files);
   }
+
+  this->appendLogInfo(tr("Analysis ended (%n file(s))", nullptr, listFilesRes.files.size()));
 }
 
 void CharsetToolMainWindow::stopAnalyse()
@@ -153,7 +178,7 @@ void CharsetToolMainWindow::onAnalyseDetection(const QString &inputFile, const Q
 void CharsetToolMainWindow::onAnalyseError(const QString &inputFile, const QString &errorText)
 {
   m_analyseProgressBar->setValue(m_analyseProgressBar->value() + 1);
-  qWarning() << QString("%1 : %2").arg(inputFile, errorText);
+  this->appendLogError(QString("%1 : %2").arg(inputFile, errorText));
 }
 
 void CharsetToolMainWindow::onAnalyseEnded()
@@ -167,4 +192,66 @@ void CharsetToolMainWindow::updateAnalyseControlButtons(bool analyseIsRunning)
 {
   m_ui->stopAnalyseBtn->setEnabled(analyseIsRunning);
   m_ui->runAnalyseBtn->setEnabled(!analyseIsRunning);
+}
+
+void CharsetToolMainWindow::clearLog()
+{
+  m_ui->logTextEdit->clear();
+}
+
+void CharsetToolMainWindow::appendLogInfo(const QString &msg)
+{
+  this->appendLog(msg, InfoLog);
+}
+
+void CharsetToolMainWindow::appendLogWarning(const QString &msg)
+{
+  this->appendLog(msg, WarningLog);
+}
+
+void CharsetToolMainWindow::appendLogError(const QString &msg)
+{
+  this->appendLog(msg, ErrorLog);
+}
+
+void CharsetToolMainWindow::appendLog(const QString &msg, LogFormat format)
+{
+  // Code taken from QtCreator src/plugins/coreplugin/outputwindow.cpp
+
+  const QPalette pal = m_ui->logTextEdit->palette();
+  QTextCharFormat textFormat;
+
+  switch (format) {
+  case InfoLog:
+    textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::blue)));
+    textFormat.setFontWeight(QFont::Normal);
+    break;
+  case WarningLog:
+    textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text),
+                                                 QColor(255, 165 ,0))); // Orange
+    textFormat.setFontWeight(QFont::Bold);
+    break;
+  case ErrorLog:
+    textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::red)));
+    textFormat.setFontWeight(QFont::Bold);
+    break;
+  }
+
+  QScrollBar* logTextEditVertScrollBar = m_ui->logTextEdit->verticalScrollBar();
+  const bool atBottom = logTextEditVertScrollBar->value() == logTextEditVertScrollBar->maximum();
+  QTextCursor cursor = QTextCursor(m_ui->logTextEdit->document());
+  cursor.movePosition(QTextCursor::End);
+  cursor.beginEditBlock();
+  //: %1 current time of log message    %2 log message
+  cursor.insertText(tr("%1: %2").arg(internal::currentTimeLogText(), msg) + QLatin1Char('\n'),
+                    textFormat);
+  cursor.endEditBlock();
+
+  if (atBottom) {
+    logTextEditVertScrollBar->setValue(logTextEditVertScrollBar->maximum());
+    // QPlainTextEdit destroys the first calls value in case of multiline
+    // text, so make sure that the scroll bar actually gets the value set.
+    // Is a noop if the first call succeeded.
+    logTextEditVertScrollBar->setValue(logTextEditVertScrollBar->maximum());
+  }
 }
