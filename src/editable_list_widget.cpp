@@ -50,7 +50,7 @@ EditableListWidget::EditableListWidget(QWidget *parent)
 
   itemBtns->installDefaultItemDelegate();
   itemBtns->addButton(0);
-  gitemBtns->setButtonIcon(0, removeIcon);
+  itemBtns->setButtonIcon(0, removeIcon);
   itemBtns->setButtonToolTip(0, tr("Delete item"));
   itemBtns->setButtonDetection(0, -1, QVariant());
   QObject::connect(itemBtns, SIGNAL(buttonClicked(int,QModelIndex)),
