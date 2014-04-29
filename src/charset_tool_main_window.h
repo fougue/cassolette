@@ -38,6 +38,7 @@
 #ifndef CHARSET_TOOL_MAIN_WINDOW_H
 #define CHARSET_TOOL_MAIN_WINDOW_H
 
+#include <QtWidgets/QFileIconProvider>
 #include <QtWidgets/QMainWindow>
 #include "editable_list_widget.h"
 #include "input_filter_dialog.h"
@@ -105,6 +106,7 @@ private:
   InputFilterDialog::FilePatterns m_excludePatterns;
   TaskId m_currentTaskId;
   QHash<QString, QTreeWidgetItem*> m_fileToItem;
+  QFileIconProvider m_fileIconProvider;
 };
 
 #endif // CHARSET_TOOL_MAIN_WINDOW_H

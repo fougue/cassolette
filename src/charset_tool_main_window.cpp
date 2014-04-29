@@ -116,8 +116,12 @@ void CharsetToolMainWindow::addInputFiles()
   const QStringList fileList = QFileDialog::getOpenFileNames(this,
                                                              tr("Select Input Files"),
                                                              m_lastInputDir);
-  foreach (const QString& file, fileList)
-    m_ui->inputListWidget->addItem(QFileInfo(file).absoluteFilePath());
+  foreach (const QString& file, fileList) {
+    const QFileInfo fileInfo(file);
+    QListWidgetItem* fileItem = new QListWidgetItem(m_fileIconProvider.icon(fileInfo),
+                                                    fileInfo.absoluteFilePath());
+    m_ui->inputListWidget->addItem(fileItem);
+  }
   if (!fileList.isEmpty())
     m_lastInputDir = QFileInfo(fileList.front()).absolutePath();
 }
@@ -129,7 +133,8 @@ void CharsetToolMainWindow::addInputFolder()
                                                            m_lastInputDir);
   if (!folder.isEmpty()) {
     const QString absoluteFolder = QDir(folder).absolutePath();
-    m_ui->inputListWidget->addItem(absoluteFolder);
+    m_ui->inputListWidget->addItem(new QListWidgetItem(m_fileIconProvider.icon(QFileIconProvider::Folder),
+                                                       absoluteFolder));
     m_lastInputDir = absoluteFolder;
   }
 }
@@ -214,6 +219,7 @@ void CharsetToolMainWindow::onAnalyseDetection(const QString &inputFile, const Q
 {
   this->incrementTaskProgress();
   QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(QString::fromUtf8(charset)) << inputFile);
+  item->setIcon(1, m_fileIconProvider.icon(QFileInfo(inputFile)));
   m_fileToItem.insert(inputFile, item);
   m_ui->analyseTreeWidget->addTopLevelItem(item);
 }
