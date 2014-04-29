@@ -42,7 +42,9 @@
 #include "editable_list_widget.h"
 #include "input_filter_dialog.h"
 class CharsetDetector;
+class CharsetEncoder;
 class QProgressBar;
+class QTreeWidgetItem;
 
 class CharsetToolMainWindow : public QMainWindow
 {
@@ -58,14 +60,28 @@ private slots:
   void editFilters();
 
   void runAnalyse();
-  void stopAnalyse();
+  void runConversion();
+  void stopCurrentTask();
 
-  void onAnalyseDetection(const QString& inputFile, const QString& charsetName);
-  void onAnalyseError(const QString& inputFile, const QString& errorText);
-  void onAnalyseEnded();
+  void onAnalyseDetection(const QString& inputFile, const QByteArray& charset);
+  void onEncoded(const QString& inputFile, const QByteArray& charset);
+  void onTaskStarted();
+  void onTaskError(const QString& inputFile, const QString& errorText);
+  void onTaskEnded();
 
 private:
-  void updateAnalyseControlButtons(bool analyseIsRunning);
+  enum TaskId
+  {
+    NoTask,
+    AnalyseTask,
+    ConversionTask
+  };
+
+  QString currentTaskName() const;
+  void setCurrentTask(TaskId taskId);
+  void updateTaskButtons();
+  void createTaskProgressBar(int fileCount);
+  void incrementTaskProgress();
 
   enum LogFormat
   {
@@ -82,10 +98,13 @@ private:
 
   class Ui_CharsetToolMainWindow *m_ui;
   QString m_lastInputDir;
-  QProgressBar* m_analyseProgressBar;
+  QProgressBar* m_taskProgressBar;
   CharsetDetector* m_csDetector;
+  CharsetEncoder* m_csEncoder;
   InputFilterDialog::FilePatterns m_filterPatterns;
   InputFilterDialog::FilePatterns m_excludePatterns;
+  TaskId m_currentTaskId;
+  QHash<QString, QTreeWidgetItem*> m_fileToItem;
 };
 
 #endif // CHARSET_TOOL_MAIN_WINDOW_H

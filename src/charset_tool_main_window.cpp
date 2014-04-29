@@ -45,7 +45,9 @@
 #include <QtWidgets/QScrollBar>
 
 #include "charset_detector.h"
+#include "charset_encoder.h"
 #include "input_filter_dialog.h"
+#include "select_charset_dialog.h"
 #include "ui_charset_tool_main_window.h"
 
 namespace internal {
@@ -68,8 +70,10 @@ static QString currentTimeLogText()
 CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
   : QMainWindow(parent),
     m_ui(new Ui_CharsetToolMainWindow),
-    m_analyseProgressBar(NULL),
-    m_csDetector(new CharsetDetector(this))
+    m_taskProgressBar(NULL),
+    m_csDetector(new CharsetDetector(this)),
+    m_csEncoder(new CharsetEncoder(this)),
+    m_currentTaskId(CharsetToolMainWindow::NoTask)
 {
   m_ui->setupUi(this);
 
@@ -78,18 +82,28 @@ CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
   QObject::connect(m_ui->addFolderBtn, SIGNAL(clicked()), this, SLOT(addInputFolder()));
 
   QObject::connect(m_ui->runAnalyseBtn, SIGNAL(clicked()), this, SLOT(runAnalyse()));
-  QObject::connect(m_ui->stopAnalyseBtn, SIGNAL(clicked()), this, SLOT(stopAnalyse()));
+  QObject::connect(m_ui->convertCharsetBtn, SIGNAL(clicked()), this, SLOT(runConversion()));
+  QObject::connect(m_ui->stopAnalyseBtn, SIGNAL(clicked()), this, SLOT(stopCurrentTask()));
+  QObject::connect(m_ui->analyseTreeWidget, &QTreeWidget::itemSelectionChanged,
+                   this, &CharsetToolMainWindow::updateTaskButtons);
 
   QObject::connect(m_csDetector, &CharsetDetector::detection,
                    this, &CharsetToolMainWindow::onAnalyseDetection);
   QObject::connect(m_csDetector, &CharsetDetector::error,
-                   this, &CharsetToolMainWindow::onAnalyseError);
+                   this, &CharsetToolMainWindow::onTaskError);
   QObject::connect(m_csDetector, &CharsetDetector::detectEnded,
-                   this, &CharsetToolMainWindow::onAnalyseEnded);
+                   this, &CharsetToolMainWindow::onTaskEnded);
 
+  QObject::connect(m_csEncoder, &CharsetEncoder::encoded,
+                   this, &CharsetToolMainWindow::onEncoded);
+  QObject::connect(m_csEncoder, &CharsetEncoder::error,
+                   this, &CharsetToolMainWindow::onTaskError);
+  QObject::connect(m_csEncoder, &CharsetEncoder::encodingEnded,
+                   this, &CharsetToolMainWindow::onTaskEnded);
+
+  this->setCurrentTask(m_currentTaskId);
   m_ui->tabWidget->setCurrentWidget(m_ui->pageFiles);
   this->statusBar()->showMessage(tr("Ready"));
-  this->updateAnalyseControlButtons(false);
 }
 
 CharsetToolMainWindow::~CharsetToolMainWindow()
@@ -133,9 +147,10 @@ void CharsetToolMainWindow::editFilters()
 
 void CharsetToolMainWindow::runAnalyse()
 {
-  m_ui->analyseTreeWidget->clear();
+  this->setCurrentTask(CharsetToolMainWindow::AnalyseTask);
 
-  this->appendLogInfo(tr("Analysis started"));
+  m_ui->analyseTreeWidget->clear();
+  m_fileToItem.clear();
 
   QStringList inputList;
   const int inputCount = m_ui->inputListWidget->count();
@@ -149,49 +164,126 @@ void CharsetToolMainWindow::runAnalyse()
     this->appendLogError(err);
 
   if (!listFilesRes.files.isEmpty()) {
-    this->updateAnalyseControlButtons(true);
-
-    m_analyseProgressBar = new QProgressBar;
-    m_analyseProgressBar->setMaximum(listFilesRes.files.size());
-    this->statusBar()->addPermanentWidget(m_analyseProgressBar);
-    m_analyseProgressBar->show();
+    // Notify user about new task
+    this->createTaskProgressBar(listFilesRes.files.size());
+    this->appendLogInfo(tr("Analysing %n file(s)", nullptr, listFilesRes.files.size()));
     this->statusBar()->showMessage(tr("Analysing ..."));
 
     m_csDetector->asyncDetect(listFilesRes.files);
   }
-
-  this->appendLogInfo(tr("Analysis ended (%n file(s))", nullptr, listFilesRes.files.size()));
+  else {
+    this->setCurrentTask(CharsetToolMainWindow::NoTask);
+  }
 }
 
-void CharsetToolMainWindow::stopAnalyse()
+void CharsetToolMainWindow::runConversion()
 {
-  m_csDetector->abortDetect();
+  SelectCharsetDialog dialog(this);
+  if (dialog.exec() == QDialog::Accepted) {
+    const QByteArray charset = dialog.selectedCharset();
+    const QString charsetStr = QString::fromUtf8(charset);
+    this->setCurrentTask(CharsetToolMainWindow::ConversionTask);
+
+    // Create vector of input files
+    const QList<QTreeWidgetItem*> selectedFileItems = m_ui->analyseTreeWidget->selectedItems();
+    QVector<CharsetEncoder::InputFile> inputFileVec;
+    inputFileVec.reserve(selectedFileItems.size());
+    foreach (const QTreeWidgetItem* fileItem, selectedFileItems) {
+      inputFileVec.append(CharsetEncoder::InputFile(fileItem->text(1),
+                                                    fileItem->text(0).toUtf8()));
+    }
+
+    // Notify user about new task
+    this->createTaskProgressBar(inputFileVec.size());
+    this->appendLogInfo(tr("Converting %n file(s) to %1 ...", NULL, inputFileVec.size())
+                        .arg(charsetStr));
+    this->statusBar()->showMessage(tr("Converting ..."));
+
+    m_csEncoder->asyncEncode(charset, inputFileVec);
+  }
 }
 
-void CharsetToolMainWindow::onAnalyseDetection(const QString &inputFile, const QString &charsetName)
+void CharsetToolMainWindow::stopCurrentTask()
 {
-  m_analyseProgressBar->setValue(m_analyseProgressBar->value() + 1);
-  QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(charsetName) << inputFile);
+  if (m_currentTaskId == CharsetToolMainWindow::AnalyseTask)
+    m_csDetector->abortDetect();
+  this->setCurrentTask(CharsetToolMainWindow::NoTask);
+}
+
+void CharsetToolMainWindow::onAnalyseDetection(const QString &inputFile, const QByteArray &charset)
+{
+  this->incrementTaskProgress();
+  QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(QString::fromUtf8(charset)) << inputFile);
+  m_fileToItem.insert(inputFile, item);
   m_ui->analyseTreeWidget->addTopLevelItem(item);
 }
 
-void CharsetToolMainWindow::onAnalyseError(const QString &inputFile, const QString &errorText)
+void CharsetToolMainWindow::onEncoded(const QString &inputFile, const QByteArray &charset)
 {
-  m_analyseProgressBar->setValue(m_analyseProgressBar->value() + 1);
+  const QString charsetStr = QString::fromUtf8(charset);
+  this->incrementTaskProgress();
+  this->appendLogInfo(tr("Converted %1 to %2").arg(inputFile).arg(charsetStr));
+  // Update detected charset
+  QTreeWidgetItem* item = m_fileToItem.value(inputFile);
+  if (item != NULL)
+    item->setText(0, QString::fromUtf8(charset));
+}
+
+void CharsetToolMainWindow::onTaskError(const QString &inputFile, const QString &errorText)
+{
+  m_taskProgressBar->setValue(m_taskProgressBar->value() + 1);
   this->appendLogError(QString("%1 : %2").arg(inputFile, errorText));
 }
 
-void CharsetToolMainWindow::onAnalyseEnded()
+void CharsetToolMainWindow::onTaskEnded()
 {
-  this->updateAnalyseControlButtons(false);
-  this->statusBar()->removeWidget(m_analyseProgressBar);
+  this->appendLogInfo(tr("%1 ended").arg(this->currentTaskName()));
+  this->setCurrentTask(CharsetToolMainWindow::NoTask);
+  this->statusBar()->removeWidget(m_taskProgressBar);
   this->statusBar()->showMessage(tr("Ready"));
 }
 
-void CharsetToolMainWindow::updateAnalyseControlButtons(bool analyseIsRunning)
+QString CharsetToolMainWindow::currentTaskName() const
 {
-  m_ui->stopAnalyseBtn->setEnabled(analyseIsRunning);
-  m_ui->runAnalyseBtn->setEnabled(!analyseIsRunning);
+  switch (m_currentTaskId) {
+  case CharsetToolMainWindow::NoTask: return tr("Idle");
+  case CharsetToolMainWindow::AnalyseTask: return tr("Analyse");
+  case CharsetToolMainWindow::ConversionTask: return tr("Conversion");
+  }
+  return QString();
+}
+
+
+void CharsetToolMainWindow::onTaskStarted()
+{
+  //this->appendLogInfo(tr("%1 started").arg(this->currentTaskName()));
+}
+
+void CharsetToolMainWindow::setCurrentTask(CharsetToolMainWindow::TaskId taskId)
+{
+  m_currentTaskId = taskId;
+  this->updateTaskButtons();
+}
+
+void CharsetToolMainWindow::updateTaskButtons()
+{
+  const bool isIdle = m_currentTaskId == CharsetToolMainWindow::NoTask;
+  m_ui->stopAnalyseBtn->setEnabled(!isIdle);
+  m_ui->runAnalyseBtn->setEnabled(isIdle);
+  m_ui->convertCharsetBtn->setEnabled(isIdle && !m_ui->analyseTreeWidget->selectedItems().isEmpty());
+}
+
+void CharsetToolMainWindow::createTaskProgressBar(int fileCount)
+{
+  m_taskProgressBar = new QProgressBar;
+  m_taskProgressBar->setMaximum(fileCount);
+  this->statusBar()->addPermanentWidget(m_taskProgressBar);
+  m_taskProgressBar->show();
+}
+
+void CharsetToolMainWindow::incrementTaskProgress()
+{
+  m_taskProgressBar->setValue(m_taskProgressBar->value() + 1);
 }
 
 void CharsetToolMainWindow::clearLog()
@@ -201,17 +293,17 @@ void CharsetToolMainWindow::clearLog()
 
 void CharsetToolMainWindow::appendLogInfo(const QString &msg)
 {
-  this->appendLog(msg, InfoLog);
+  this->appendLog(msg, CharsetToolMainWindow::InfoLog);
 }
 
 void CharsetToolMainWindow::appendLogWarning(const QString &msg)
 {
-  this->appendLog(msg, WarningLog);
+  this->appendLog(msg, CharsetToolMainWindow::WarningLog);
 }
 
 void CharsetToolMainWindow::appendLogError(const QString &msg)
 {
-  this->appendLog(msg, ErrorLog);
+  this->appendLog(msg, CharsetToolMainWindow::ErrorLog);
 }
 
 void CharsetToolMainWindow::appendLog(const QString &msg, LogFormat format)
@@ -222,16 +314,16 @@ void CharsetToolMainWindow::appendLog(const QString &msg, LogFormat format)
   QTextCharFormat textFormat;
 
   switch (format) {
-  case InfoLog:
+  case CharsetToolMainWindow::InfoLog:
     textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::blue)));
     textFormat.setFontWeight(QFont::Normal);
     break;
-  case WarningLog:
+  case CharsetToolMainWindow::WarningLog:
     textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text),
                                                  QColor(255, 165 ,0))); // Orange
     textFormat.setFontWeight(QFont::Bold);
     break;
-  case ErrorLog:
+  case CharsetToolMainWindow::ErrorLog:
     textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::red)));
     textFormat.setFontWeight(QFont::Bold);
     break;

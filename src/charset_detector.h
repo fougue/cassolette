@@ -67,7 +67,7 @@ public:
 
 signals:
   void detectStarted();
-  void detection(const QString& inputFile, const QString& charsetName);
+  void detection(const QString& inputFile, const QByteArray& charsetName);
   void error(const QString& inputFile, const QString& errorText);
   void detectEnded();
 
@@ -78,7 +78,7 @@ private:
   struct FileDetectionResult
   {
     QString filePath;
-    QString encoding;
+    QByteArray encoding;
     QString error;
   };
 

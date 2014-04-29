@@ -35,23 +35,53 @@
 **
 ****************************************************************************/
 
-#include <QtWidgets/QApplication>
+#ifndef CHARSET_ENCODER_H
+#define CHARSET_ENCODER_H
 
-#include "charset_detector.h"
-#include "charset_tool_main_window.h"
+#include <QtCore/QFutureWatcher>
+#include <QtCore/QHash>
+#include <QtCore/QObject>
+class QTextCodec;
 
-int main(int argc, char** argv)
+class CharsetEncoder : public QObject
 {
-  QApplication app(argc, argv);
+  Q_OBJECT
 
-  // Define settings informations once
-  QCoreApplication::setOrganizationName("FougSys");
-  QCoreApplication::setOrganizationDomain("www.fougsys.fr");
-  QCoreApplication::setApplicationName(QLatin1String("charset-tool"));
-  //QCoreApplication::setApplicationVersion(versionNumber);
+public:
+  struct InputFile
+  {
+    InputFile();
+    InputFile(const QString& pFilePath, const QByteArray& pCharset);
+    QString filePath;
+    QByteArray charset;
+  };
 
-  CharsetToolMainWindow mainWin;
-  mainWin.show();
+  CharsetEncoder(QObject *parent = NULL);
 
-  return app.exec();
-}
+  Q_SLOT void asyncEncode(const QByteArray& charset, const QVector<InputFile>& fileVec);
+  Q_SLOT void abortEncoding();
+
+signals:
+  void encodingStarted();
+  void encoded(const QString& inputFile, const QByteArray& charset);
+  void error(const QString& inputFile, const QString& errorText);
+  void encodingEnded();
+
+private slots:
+  void onEncodingResultReadyAt(int index);
+
+private:
+  struct FileEncodingResult
+  {
+    InputFile inputFile;
+    QString error;
+  };
+
+  FileEncodingResult encodeFile(const InputFile& inputFile);
+
+  QHash<QByteArray, QTextCodec*> m_codecCache;
+  QFutureWatcher<FileEncodingResult> m_encodeWatcher;
+  QTextCodec *m_dstCodec;
+};
+
+#endif // CHARSET_ENCODER_H

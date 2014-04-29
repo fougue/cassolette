@@ -35,23 +35,25 @@
 **
 ****************************************************************************/
 
-#include <QtWidgets/QApplication>
+#ifndef SELECT_CHARSET_DIALOG_H
+#define SELECT_CHARSET_DIALOG_H
 
-#include "charset_detector.h"
-#include "charset_tool_main_window.h"
+#include <QtWidgets/QDialog>
 
-int main(int argc, char** argv)
+class SelectCharsetDialog : public QDialog
 {
-  QApplication app(argc, argv);
+  Q_OBJECT
 
-  // Define settings informations once
-  QCoreApplication::setOrganizationName("FougSys");
-  QCoreApplication::setOrganizationDomain("www.fougsys.fr");
-  QCoreApplication::setApplicationName(QLatin1String("charset-tool"));
-  //QCoreApplication::setApplicationVersion(versionNumber);
+public:
+  SelectCharsetDialog(QWidget *parent = NULL);
+  ~SelectCharsetDialog();
 
-  CharsetToolMainWindow mainWin;
-  mainWin.show();
+  QByteArray selectedCharset() const;
 
-  return app.exec();
-}
+  void accept();
+
+private:
+  class Ui_SelectCharsetDialog *m_ui;
+};
+
+#endif // SELECT_CHARSET_DIALOG_H

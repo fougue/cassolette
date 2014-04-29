@@ -9,5 +9,6 @@
         <file>images/folder-new.png</file>
         <file>images/list-remove_active.png</file>
         <file>images/document-edit-verify.png</file>
+        <file>images/run-build-file.png</file>
     </qresource>
 </RCC>
