@@ -43,6 +43,9 @@
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 #include <QtCore/QTextCodec>
+#include <QtCore/QSortFilterProxyModel>
+#include <QtGui/QStandardItemModel>
+#include <QtWidgets/QMessageBox>
 
 namespace internal {
 
@@ -53,22 +56,27 @@ static const int  SelectCharsetDialog_codecDataRole = Qt::UserRole + 1;
 
 SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
   : QDialog(parent),
-    m_ui(new Ui_SelectCharsetDialog)
+    m_ui(new Ui_SelectCharsetDialog),
+    m_filterCodecModel(new QSortFilterProxyModel(this))
 {
   m_ui->setupUi(this);
+  m_filterCodecModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+  QObject::connect(m_ui->findLineEdit, &QLineEdit::textChanged,
+                   this, &SelectCharsetDialog::onFilterChanged);
+  QObject::connect(m_ui->charsetListView, &QListView::doubleClicked,
+                   this, &SelectCharsetDialog::accept);
 
   QSettings appSettings;
   const QString iniLastCodecName = appSettings.value(internal::SelectCharsetDialog_lastCodecNameIniKey,
                                                      QLatin1String("UTF-8")).toString();
 
-  // Build sorted map of charset names
-  QMap<QByteArray, QTextCodec*> codecMap;
-  foreach (const QByteArray& codecName, QTextCodec::availableCodecs())
-    codecMap.insert(codecName, QTextCodec::codecForName(codecName));
+  QStandardItemModel* codecModel = new QStandardItemModel(m_filterCodecModel);
+  QStandardItem* codecItemToSelect = NULL;
 
-  // Build list widget
-  foreach (const QByteArray& codecName, codecMap.keys()) {
-    const QTextCodec* codec = codecMap.value(codecName);
+  // Build sorted map of charset names
+  foreach (const QByteArray& codecName, QTextCodec::availableCodecs()) {
+    const QTextCodec* codec = QTextCodec::codecForName(codecName);
 
     // Build list of codec names
     const QString codecNameStr(codecName);
@@ -80,15 +88,22 @@ SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
     }
 
     // Create list item for codec
-    QListWidgetItem* codecItem = new QListWidgetItem(codecAliasList.join(QLatin1String(" / ")),
-                                                     m_ui->charsetListWidget);
-    codecItem->setData(internal::SelectCharsetDialog_codecDataRole, codecName);
+    QStandardItem* codecItem = new QStandardItem(codecAliasList.join(QLatin1String(" / ")));
+    codecItem->setData(codecName, internal::SelectCharsetDialog_codecDataRole);
+    codecModel->appendRow(codecItem);
+    codecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     if (codecName == iniLastCodecName)
-      codecItem->setSelected(true);
+      codecItemToSelect = codecItem;
   }
 
-  QObject::connect(m_ui->charsetListWidget, &QListWidget::itemDoubleClicked,
-                   this, &SelectCharsetDialog::accept);
+  // Select the codec item lastly chosen
+  m_filterCodecModel->setSourceModel(codecModel);
+  m_filterCodecModel->sort(0, Qt::AscendingOrder);
+  m_ui->charsetListView->setModel(m_filterCodecModel);
+  if (codecItemToSelect != NULL) {
+    m_ui->charsetListView->selectionModel()->select(codecItemToSelect->index(),
+                                                    QItemSelectionModel::ClearAndSelect);
+  }
 }
 
 SelectCharsetDialog::~SelectCharsetDialog()
@@ -98,11 +113,11 @@ SelectCharsetDialog::~SelectCharsetDialog()
 
 QByteArray SelectCharsetDialog::selectedCharset() const
 {
-  const QList<QListWidgetItem*> selectedCodecItems = m_ui->charsetListWidget->selectedItems();
-  if (selectedCodecItems.size() == 1) {
-    const QListWidgetItem* codecItem = selectedCodecItems.first();
-    return codecItem->data(internal::SelectCharsetDialog_codecDataRole).toByteArray();
-  }
+  const QModelIndexList selectedCodecIndexes = m_ui->charsetListView->selectionModel()->selectedIndexes();
+  const QModelIndex codecIndex = selectedCodecIndexes.size() == 1 ? selectedCodecIndexes.first() :
+                                                                    QModelIndex();
+  if (codecIndex.isValid())
+    return codecIndex.data(internal::SelectCharsetDialog_codecDataRole).toByteArray();
   return QByteArray();
 }
 
@@ -112,7 +127,14 @@ void SelectCharsetDialog::accept()
   if (!currentCharset.isEmpty()) {
     QSettings appSettings;
     appSettings.setValue(internal::SelectCharsetDialog_lastCodecNameIniKey, currentCharset);
+    QDialog::accept();
   }
+  else {
+    QMessageBox::information(this, tr("Error"), tr("No character set selected"));
+  }
+}
 
-  QDialog::accept();
+void SelectCharsetDialog::onFilterChanged(const QString &filter)
+{
+  m_filterCodecModel->setFilterFixedString(filter);
 }
