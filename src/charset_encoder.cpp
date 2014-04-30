@@ -43,19 +43,16 @@
 #include <functional>
 
 CharsetEncoder::CharsetEncoder(QObject *parent)
-  : QObject(parent),
+  : BaseFileTask(parent),
     m_dstCodec(NULL)
 {
-  QObject::connect(&m_encodeWatcher, SIGNAL(resultReadyAt(int)),
-                   this, SLOT(onEncodingResultReadyAt(int)));
-  QObject::connect(&m_encodeWatcher, SIGNAL(finished()), this, SIGNAL(encodingEnded()));
-  QObject::connect(&m_encodeWatcher, SIGNAL(canceled()), this, SIGNAL(encodingEnded()));
+  this->createFutureWatcher();
 }
 
 void CharsetEncoder::asyncEncode(const QByteArray& charset,
                                  const QVector<CharsetEncoder::InputFile> &fileVec)
 {
-  emit encodingStarted();
+  emit taskStarted();
 
   m_dstCodec = QTextCodec::codecForName(charset);
   if (m_dstCodec != NULL) {
@@ -65,36 +62,22 @@ void CharsetEncoder::asyncEncode(const QByteArray& charset,
         m_codecCache.insert(inputCharset, QTextCodec::codecForName(inputCharset));
     }
 
-    QFuture<FileEncodingResult> future = QtConcurrent::mapped(fileVec,
-                                                              std::bind(&CharsetEncoder::encodeFile,
-                                                                        this,
-                                                                        std::placeholders::_1));
-    m_encodeWatcher.setFuture(future);
+    auto future = QtConcurrent::mapped(fileVec, std::bind(&CharsetEncoder::encodeFile,
+                                                          this,
+                                                          std::placeholders::_1));
+    this->futureWatcher()->setFuture(future);
   }
   else {
-    emit error(QString(), tr("Null text encoder for %1").arg(QString::fromUtf8(charset)));
-    emit encodingEnded();
+    emit taskError(QString(), tr("Null text encoder for %1").arg(QString::fromUtf8(charset)));
+    emit taskFinished();
   }
 }
 
-void CharsetEncoder::abortEncoding()
+BaseFileTask::FileResult CharsetEncoder::encodeFile(const CharsetEncoder::InputFile &inputFile)
 {
-  m_encodeWatcher.cancel();
-}
-
-void CharsetEncoder::onEncodingResultReadyAt(int index)
-{
-  const FileEncodingResult result = m_encodeWatcher.resultAt(index);
-  if (result.error.isEmpty())
-    emit encoded(result.inputFile.filePath, m_dstCodec->name());
-  else
-    emit error(result.inputFile.filePath, result.error);
-}
-
-CharsetEncoder::FileEncodingResult CharsetEncoder::encodeFile(const CharsetEncoder::InputFile &inputFile)
-{
-  CharsetEncoder::FileEncodingResult result;
-  result.inputFile = inputFile;
+  BaseFileTask::FileResult result;
+  result.filePath = inputFile.filePath;
+  result.payload = m_dstCodec->name();
 
   const QString inputFilePath = inputFile.filePath;
   QTextCodec *srcCodec = m_codecCache.value(inputFile.charset);
@@ -111,14 +94,14 @@ CharsetEncoder::FileEncodingResult CharsetEncoder::encodeFile(const CharsetEncod
           writeSuccess = true;
       }
       if (!writeSuccess)
-        result.error = tr("Failed to write contents (%1)").arg(file.errorString());
+        result.errorText = tr("Failed to write contents (%1)").arg(file.errorString());
     }
     else {
-      result.error = tr("Failed to read file (%1)").arg(file.errorString());
+      result.errorText = tr("Failed to read file (%1)").arg(file.errorString());
     }
   }
   else {
-    result.error = tr("Null text encoder for %1").arg(QString::fromUtf8(inputFile.charset));
+    result.errorText = tr("Null text encoder for %1").arg(QString::fromUtf8(inputFile.charset));
   }
 
   return result;

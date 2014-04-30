@@ -35,35 +35,47 @@
 **
 ****************************************************************************/
 
-#ifndef CHARSET_ENCODER_H
-#define CHARSET_ENCODER_H
-
 #include "base_file_task.h"
-#include <QtCore/QHash>
-class QTextCodec;
 
-class CharsetEncoder : public BaseFileTask
+#include <QtCore/QFutureWatcher>
+
+BaseFileTask::BaseFileTask(QObject *parent)
+  : QObject(parent),
+    m_futureWatcher(NULL)
 {
-  Q_OBJECT
+}
 
-public:
-  struct InputFile
-  {
-    InputFile();
-    InputFile(const QString& pFilePath, const QByteArray& pCharset);
-    QString filePath;
-    QByteArray charset;
-  };
+BaseFileTask::~BaseFileTask()
+{
+}
 
-  CharsetEncoder(QObject *parent = NULL);
+void BaseFileTask::abortTask()
+{
+  if (m_futureWatcher != NULL)
+    m_futureWatcher->cancel();
+}
 
-  void asyncEncode(const QByteArray& charset, const QVector<InputFile>& fileVec);
+void BaseFileTask::onTaskResultReadyAt(int resultId)
+{
+  const BaseFileTask::FileResult fileRes = m_futureWatcher->resultAt(resultId);
+  if (fileRes.errorText.isEmpty())
+    emit taskResult(fileRes.filePath, fileRes.payload);
+  else
+    emit taskError(fileRes.filePath, fileRes.errorText);
+}
 
-private:
-  BaseFileTask::FileResult encodeFile(const InputFile& inputFile);
+void BaseFileTask::createFutureWatcher()
+{
+  if (m_futureWatcher == NULL) {
+    m_futureWatcher = new QFutureWatcher<FileResult>(this);
+    QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SIGNAL(taskFinished()));
+    QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SIGNAL(taskAborted()));
+    QObject::connect(m_futureWatcher, SIGNAL(resultReadyAt(int)),
+                     this, SLOT(onTaskResultReadyAt(int)));
+  }
+}
 
-  QHash<QByteArray, QTextCodec*> m_codecCache;
-  QTextCodec *m_dstCodec;
-};
-
-#endif // CHARSET_ENCODER_H
+QFutureWatcher<BaseFileTask::FileResult> *BaseFileTask::futureWatcher() const
+{
+  return m_futureWatcher;
+}

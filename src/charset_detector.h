@@ -38,22 +38,21 @@
 #ifndef CHARSET_DETECTOR_H
 #define CHARSET_DETECTOR_H
 
-#include <QtCore/QObject>
+#include "base_file_task.h"
+
 #include <QtCore/QStringList>
 #include <QtCore/QThreadStorage>
-#include <QtCore/QFutureWatcher>
 
 namespace internal { class TextFileFormatDetector; }
 
-class CharsetDetector : public QObject
+class CharsetDetector : public BaseFileTask
 {
   Q_OBJECT
 
 public:
   CharsetDetector(QObject* parent = NULL);
 
-  Q_SLOT void asyncDetect(const QStringList& filePathList);
-  Q_SLOT void abortDetect();
+  void asyncDetect(const QStringList& filePathList);
 
   struct ListFilesResult
   {
@@ -65,27 +64,10 @@ public:
                                    const QStringList& filters = QStringList(),
                                    const QStringList& excludes = QStringList());
 
-signals:
-  void detectStarted();
-  void detection(const QString& inputFile, const QByteArray& charsetName);
-  void error(const QString& inputFile, const QString& errorText);
-  void detectEnded();
-
-private slots:
-  void onDetectionResultReadyAt(int index);
-
 private:
-  struct FileDetectionResult
-  {
-    QString filePath;
-    QByteArray encoding;
-    QString error;
-  };
-
-  FileDetectionResult detectFile(const QString& filePath);
+  BaseFileTask::FileResult detectFile(const QString& filePath);
 
   QThreadStorage<internal::TextFileFormatDetector*> m_detectorByThread;
-  QFutureWatcher<FileDetectionResult> m_detectWatcher;
 };
 
 #endif // CHARSET_DETECTOR_H

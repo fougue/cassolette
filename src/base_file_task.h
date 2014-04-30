@@ -35,35 +35,45 @@
 **
 ****************************************************************************/
 
-#ifndef CHARSET_ENCODER_H
-#define CHARSET_ENCODER_H
+#ifndef BASE_FILE_TASK_H
+#define BASE_FILE_TASK_H
 
-#include "base_file_task.h"
-#include <QtCore/QHash>
-class QTextCodec;
+#include <QtCore/QObject>
+#include <QtCore/QVariant>
+template<typename T> class QFutureWatcher;
 
-class CharsetEncoder : public BaseFileTask
+class BaseFileTask : public QObject
 {
   Q_OBJECT
 
 public:
-  struct InputFile
+  BaseFileTask(QObject* parent = NULL);
+  ~BaseFileTask();
+
+  Q_SLOT virtual void abortTask();
+
+signals:
+  void taskStarted();
+  void taskResult(const QString& filePath, const QVariant& payload);
+  void taskError(const QString& filePath, const QString& errorText);
+  void taskFinished();
+  void taskAborted();
+
+protected:
+  struct FileResult
   {
-    InputFile();
-    InputFile(const QString& pFilePath, const QByteArray& pCharset);
-    QString filePath;
-    QByteArray charset;
+    QString  filePath;
+    QVariant payload;
+    QString  errorText;
   };
 
-  CharsetEncoder(QObject *parent = NULL);
+  void createFutureWatcher();
+  QFutureWatcher<FileResult>* futureWatcher() const;
 
-  void asyncEncode(const QByteArray& charset, const QVector<InputFile>& fileVec);
+  Q_SLOT virtual void onTaskResultReadyAt(int resultId);
 
 private:
-  BaseFileTask::FileResult encodeFile(const InputFile& inputFile);
-
-  QHash<QByteArray, QTextCodec*> m_codecCache;
-  QTextCodec *m_dstCodec;
+  QFutureWatcher<FileResult>* m_futureWatcher;
 };
 
-#endif // CHARSET_ENCODER_H
+#endif // BASE_FILE_TASK_H

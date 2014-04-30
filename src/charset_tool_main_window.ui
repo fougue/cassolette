@@ -187,26 +187,6 @@
           </spacer>
          </item>
          <item>
-          <widget class="QToolButton" name="stopAnalyseBtn">
-           <property name="toolTip">
-            <string>Stop Current Task</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../charset-tool.qrc">
-             <normaloff>:/images/process-stop.png</normaloff>:/images/process-stop.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>24</width>
-             <height>24</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QToolButton" name="runAnalyseBtn">
            <property name="toolTip">
             <string>Run Analysis</string>
@@ -350,7 +330,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <customwidgets>
   <customwidget>

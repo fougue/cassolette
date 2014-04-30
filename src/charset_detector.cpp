@@ -125,36 +125,27 @@ static bool acceptInputFile(const QString& file,
 } // namespace internal
 
 CharsetDetector::CharsetDetector(QObject *parent)
-  : QObject(parent)
+  : BaseFileTask(parent)
 {
-  QObject::connect(&m_detectWatcher, SIGNAL(resultReadyAt(int)),
-                   this, SLOT(onDetectionResultReadyAt(int)));
-  QObject::connect(&m_detectWatcher, SIGNAL(finished()), this, SIGNAL(detectEnded()));
-  QObject::connect(&m_detectWatcher, SIGNAL(canceled()), this, SIGNAL(detectEnded()));
+  this->createFutureWatcher();
 }
 
 void CharsetDetector::asyncDetect(const QStringList &filePathList)
 {
-  emit detectStarted();
+  emit taskStarted();
 
   foreach (const QString& filePath, filePathList) {
     const QFileInfo fileInfo(filePath);
-    FileDetectionResult detRes;
+    BaseFileTask::FileResult detRes;
     detRes.filePath = fileInfo.absoluteFilePath();
     if (!fileInfo.isFile())
-      detRes.error = tr("Not a file");
+      detRes.errorText = tr("Not a file");
   }
 
-  QFuture<FileDetectionResult> future = QtConcurrent::mapped(filePathList,
-                                                             std::bind(&CharsetDetector::detectFile,
-                                                                       this,
-                                                                       std::placeholders::_1));
-  m_detectWatcher.setFuture(future);
-}
-
-void CharsetDetector::abortDetect()
-{
-  m_detectWatcher.cancel();
+  auto future = QtConcurrent::mapped(filePathList, std::bind(&CharsetDetector::detectFile,
+                                                             this,
+                                                             std::placeholders::_1));
+  this->futureWatcher()->setFuture(future);
 }
 
 CharsetDetector::ListFilesResult CharsetDetector::listFiles(const QStringList &inputs,
@@ -200,27 +191,18 @@ CharsetDetector::ListFilesResult CharsetDetector::listFiles(const QStringList &i
   return result;
 }
 
-void CharsetDetector::onDetectionResultReadyAt(int index)
+BaseFileTask::FileResult CharsetDetector::detectFile(const QString &filePath)
 {
-  const FileDetectionResult result = m_detectWatcher.resultAt(index);
-  if (result.error.isEmpty())
-    emit detection(result.filePath, result.encoding);
-  else
-    emit error(result.filePath, result.error);
-}
-
-CharsetDetector::FileDetectionResult CharsetDetector::detectFile(const QString &filePath)
-{
-  FileDetectionResult fileDetectResult;
+  BaseFileTask::FileResult result;
 
   if (!m_detectorByThread.hasLocalData())
     m_detectorByThread.setLocalData(new internal::TextFileFormatDetector(NS_FILTER_ALL));
   internal::TextFileFormatDetector* formatDetector = m_detectorByThread.localData();
 
   const QFileInfo fileInfo(filePath);
-  fileDetectResult.filePath = fileInfo.absoluteFilePath();
+  result.filePath = fileInfo.absoluteFilePath();
   if (fileInfo.isFile()) {
-    QFile file(fileDetectResult.filePath);
+    QFile file(result.filePath);
     if (file.open(QIODevice::ReadOnly)) {
       const QByteArray fileContents = file.readAll();
       formatDetector->init();
@@ -228,16 +210,16 @@ CharsetDetector::FileDetectionResult CharsetDetector::detectFile(const QString &
                                                             fileContents.size());
       formatDetector->DataEnd();
       if (handleRes == NS_OK && formatDetector->detectedEncodingName() != NULL)
-        fileDetectResult.encoding = formatDetector->detectedEncodingName();
+        result.payload = formatDetector->detectedEncodingName();
     }
     else {
-      fileDetectResult.error = !file.errorString().isEmpty() ? file.errorString() :
-                                                               tr("Unknonw error");
+      result.errorText = !file.errorString().isEmpty() ? file.errorString() :
+                                                         tr("Unknonw error");
     }
   }
   else {
-    fileDetectResult.error = tr("Not a file");
+    result.errorText = tr("Not a file");
   }
 
-  return fileDetectResult;
+  return result;
 }

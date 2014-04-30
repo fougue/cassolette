@@ -42,9 +42,10 @@
 #include <QtWidgets/QMainWindow>
 #include "editable_list_widget.h"
 #include "input_filter_dialog.h"
+class BaseFileTask;
 class CharsetDetector;
 class CharsetEncoder;
-class QProgressBar;
+class QProgressDialog;
 class QTreeWidgetItem;
 
 class CharsetToolMainWindow : public QMainWindow
@@ -62,13 +63,14 @@ private slots:
 
   void runAnalyse();
   void runConversion();
-  void stopCurrentTask();
+  void handleUserAbort();
 
-  void onAnalyseDetection(const QString& inputFile, const QByteArray& charset);
-  void onEncoded(const QString& inputFile, const QByteArray& charset);
+  void onAnalyseDetection(const QString& inputFile, const QVariant& payload);
+  void onEncoded(const QString& inputFile, const QVariant& payload);
   void onTaskStarted();
   void onTaskError(const QString& inputFile, const QString& errorText);
-  void onTaskEnded();
+  void onTaskAborted();
+  void onTaskFinished();
 
 private:
   enum TaskId
@@ -78,11 +80,16 @@ private:
     ConversionTask
   };
 
+  void connectTask(const BaseFileTask* task);
+
+  BaseFileTask* currentTask() const;
   QString currentTaskName() const;
   void setCurrentTask(TaskId taskId);
+
   void updateTaskButtons();
-  void createTaskProgressBar(int fileCount);
+  void createTaskProgressDialog(const QString& labelText, int fileCount);
   void incrementTaskProgress();
+  void onTaskEnded();
 
   enum LogFormat
   {
@@ -99,7 +106,7 @@ private:
 
   class Ui_CharsetToolMainWindow *m_ui;
   QString m_lastInputDir;
-  QProgressBar* m_taskProgressBar;
+  QProgressDialog* m_taskProgressDialog;
   CharsetDetector* m_csDetector;
   CharsetEncoder* m_csEncoder;
   InputFilterDialog::FilePatterns m_filterPatterns;
