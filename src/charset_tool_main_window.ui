@@ -189,7 +189,7 @@
          <item>
           <widget class="QToolButton" name="runAnalyseBtn">
            <property name="toolTip">
-            <string>Run Analysis</string>
+            <string>Run Analyse</string>
            </property>
            <property name="text">
             <string>...</string>
