@@ -40,6 +40,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
+#include <QtCore/QVector>
 template<typename T> class QFutureWatcher;
 
 class BaseFileTask : public QObject
@@ -47,33 +48,43 @@ class BaseFileTask : public QObject
   Q_OBJECT
 
 public:
+  struct ResultItem
+  {
+    QString  filePath;
+    QVariant payload;
+    QString  errorText;
+    bool hasError() const;
+  };
+  typedef QVector<BaseFileTask::ResultItem> ResultBatch;
+
   BaseFileTask(QObject* parent = NULL);
   ~BaseFileTask();
 
   Q_SLOT virtual void abortTask();
 
+  int batchSize() const;
+  void setBatchSize(int size);
+
 signals:
   void taskStarted();
-  void taskResult(const QString& filePath, const QVariant& payload);
-  void taskError(const QString& filePath, const QString& errorText);
+  void taskBatch(const BaseFileTask::ResultBatch& batch);
   void taskFinished();
   void taskAborted();
 
 protected:
-  struct FileResult
-  {
-    QString  filePath;
-    QVariant payload;
-    QString  errorText;
-  };
-
   void createFutureWatcher();
-  QFutureWatcher<FileResult>* futureWatcher() const;
+  QFutureWatcher<BaseFileTask::ResultItem> *futureWatcher() const;
 
   Q_SLOT virtual void onTaskResultReadyAt(int resultId);
 
+private slots:
+  void onFutureWatcherFinished();
+  void onFutureWatcherCanceled();
+
 private:
-  QFutureWatcher<FileResult>* m_futureWatcher;
+  QFutureWatcher<BaseFileTask::ResultItem>* m_futureWatcher;
+  int m_batchSize;
+  QVector<ResultItem> m_batchVec;
 };
 
 #endif // BASE_FILE_TASK_H

@@ -68,14 +68,14 @@ void CharsetEncoder::asyncEncode(const QByteArray& charset,
     this->futureWatcher()->setFuture(future);
   }
   else {
-    emit taskError(QString(), tr("Null text encoder for %1").arg(QString::fromUtf8(charset)));
+    //emit taskError(QString(), tr("Null text encoder for %1").arg(QString::fromUtf8(charset)));
     emit taskFinished();
   }
 }
 
-BaseFileTask::FileResult CharsetEncoder::encodeFile(const CharsetEncoder::InputFile &inputFile)
+BaseFileTask::ResultItem CharsetEncoder::encodeFile(const CharsetEncoder::InputFile &inputFile)
 {
-  BaseFileTask::FileResult result;
+  BaseFileTask::ResultItem result;
   result.filePath = inputFile.filePath;
   result.payload = m_dstCodec->name();
 

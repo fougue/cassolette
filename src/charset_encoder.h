@@ -60,7 +60,7 @@ public:
   void asyncEncode(const QByteArray& charset, const QVector<InputFile>& fileVec);
 
 private:
-  BaseFileTask::FileResult encodeFile(const InputFile& inputFile);
+  BaseFileTask::ResultItem encodeFile(const InputFile& inputFile);
 
   QHash<QByteArray, QTextCodec*> m_codecCache;
   QTextCodec *m_dstCodec;

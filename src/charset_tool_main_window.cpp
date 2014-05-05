@@ -49,9 +49,11 @@
 #include "charset_detector.h"
 #include "charset_encoder.h"
 #include "input_filter_dialog.h"
-#include "progress_dialog.h"
 #include "select_charset_dialog.h"
 #include "ui_charset_tool_main_window.h"
+
+#include "progress_dialog.h"
+//#include <QtWidgets/QProgressDialog>
 
 namespace internal {
 
@@ -90,15 +92,15 @@ CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
                    this, &CharsetToolMainWindow::updateTaskButtons);
 
   // Task "analyse"
-  QObject::connect(m_csDetector, &BaseFileTask::taskResult,
-                   this, &CharsetToolMainWindow::onAnalyseDetection);
   this->connectTask(m_csDetector);
+  QObject::connect(m_csDetector, &CharsetDetector::taskBatch,
+                   this, &CharsetToolMainWindow::onDetectionBatch);
   m_csDetector->setObjectName(tr("Analyse"));
 
   // Task "conversion"
-  QObject::connect(m_csEncoder, &BaseFileTask::taskResult,
-                   this, &CharsetToolMainWindow::onEncoded);
   this->connectTask(m_csEncoder);
+  QObject::connect(m_csEncoder, &CharsetEncoder::taskBatch,
+                   this, &CharsetToolMainWindow::onEncodingBatch);
   m_csEncoder->setObjectName(tr("Conversion"));
 
   // Init
@@ -207,30 +209,54 @@ void CharsetToolMainWindow::runConversion()
   }
 }
 
-void CharsetToolMainWindow::onAnalyseDetection(const QString &inputFile, const QVariant &payload)
+void CharsetToolMainWindow::onDetectionBatch(const BaseFileTask::ResultBatch &batch)
 {
-  const QString charset = payload.toString();
-  QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(charset) << inputFile);
-  item->setIcon(1, m_fileIconProvider.icon(QFileInfo(inputFile)));
-  m_fileToItem.insert(inputFile, item);
-  m_ui->analyseTreeWidget->addTopLevelItem(item);
-  this->incrementTaskProgress();
+  QList<QTreeWidgetItem*> itemList;
+  foreach (const BaseFileTask::ResultItem& result, batch) {
+    this->handleAbortTask();
+    if (!result.hasError()) {
+      const QString charset = result.payload.toString();
+      QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(charset) << result.filePath);
+      item->setIcon(1, m_fileIconProvider.icon(QFileInfo(result.filePath)));
+      m_fileToItem.insert(result.filePath, item);
+      itemList.append(item);
+    }
+    else {
+      this->handleTaskError(result.filePath, result.errorText);
+    }
+  }
+
+  this->incrementTaskProgress(batch.size());
+  m_ui->analyseTreeWidget->addTopLevelItems(itemList);
 }
 
-void CharsetToolMainWindow::onEncoded(const QString &inputFile, const QVariant &payload)
+void CharsetToolMainWindow::onEncodingBatch(const BaseFileTask::ResultBatch &batch)
 {
-  const QString charset = payload.toString();
-  this->incrementTaskProgress();
-  this->appendLogInfo(tr("Converted %1 to %2").arg(inputFile).arg(charset));
-  // Update detected charset
-  QTreeWidgetItem* item = m_fileToItem.value(inputFile);
-  if (item != NULL)
-    item->setText(0, charset);
+  foreach (const BaseFileTask::ResultItem& result, batch) {
+    this->handleAbortTask();
+    if (!result.hasError()) {
+      const QString charset = result.payload.toString();
+      this->appendLogInfo(tr("Converted %1 to %2").arg(result.filePath).arg(charset));
+      // Update detected charset
+      QTreeWidgetItem* item = m_fileToItem.value(result.filePath);
+      if (item != NULL)
+        item->setText(0, charset);
+    }
+    else {
+      this->handleTaskError(result.filePath, result.errorText);
+    }
+  }
+
+  this->incrementTaskProgress(batch.size());
 }
 
-void CharsetToolMainWindow::onTaskError(const QString &inputFile, const QString &errorText)
+void CharsetToolMainWindow::onTaskStarted()
 {
-  this->incrementTaskProgress();
+  //this->appendLogInfo(tr("%1 started").arg(this->currentTaskName()));
+}
+
+void CharsetToolMainWindow::handleTaskError(const QString &inputFile, const QString &errorText)
+{
   this->appendLogError(QString("%1 : %2").arg(inputFile, errorText));
 }
 
@@ -259,8 +285,6 @@ void CharsetToolMainWindow::onTaskEnded()
 
 void CharsetToolMainWindow::connectTask(const BaseFileTask *task)
 {
-  QObject::connect(task, &BaseFileTask::taskError,
-                   this, &CharsetToolMainWindow::onTaskError);
   QObject::connect(task, &BaseFileTask::taskAborted,
                    this, &CharsetToolMainWindow::onTaskAborted);
   QObject::connect(task, &BaseFileTask::taskFinished,
@@ -285,16 +309,16 @@ QString CharsetToolMainWindow::currentTaskName() const
     return tr("Idle");
 }
 
-
-void CharsetToolMainWindow::onTaskStarted()
-{
-  //this->appendLogInfo(tr("%1 started").arg(this->currentTaskName()));
-}
-
 void CharsetToolMainWindow::setCurrentTask(CharsetToolMainWindow::TaskId taskId)
 {
   m_currentTaskId = taskId;
   this->updateTaskButtons();
+}
+
+void CharsetToolMainWindow::handleAbortTask()
+{
+  if (m_taskProgressDialog->wasCanceled())
+    this->currentTask()->abortTask();
 }
 
 void CharsetToolMainWindow::updateTaskButtons()
@@ -306,25 +330,25 @@ void CharsetToolMainWindow::updateTaskButtons()
 
 void CharsetToolMainWindow::createTaskProgressDialog(const QString &labelText, int fileCount)
 {
-  if (m_taskProgressDialog == NULL)
+  if (m_taskProgressDialog == nullptr) {
     m_taskProgressDialog = new ProgressDialog(this);
-  else
-    QObject::disconnect(m_taskProgressDialog, &ProgressDialog::canceled, NULL, NULL);
+//    m_taskProgressDialog->setWindowTitle(tr("Please wait"));
+//    m_taskProgressDialog->setWindowModality(Qt::WindowModal);
+//    m_taskProgressDialog->setCancelButtonText(tr("Abort"));
+  }
   m_taskProgressDialog->setLabelText(labelText);
   m_taskProgressDialog->setValue(0);
   m_taskProgressDialog->setMaximumValue(fileCount);
-
-  QObject::connect(m_taskProgressDialog, &ProgressDialog::canceled,
-                   this->currentTask(), &BaseFileTask::abortTask);
+  m_taskProgressDialog->resetCancelFlag();
 
   m_taskProgressDialog->show();
 
   this->appendLogInfo(labelText);
 }
 
-void CharsetToolMainWindow::incrementTaskProgress()
+void CharsetToolMainWindow::incrementTaskProgress(int amount)
 {
-  m_taskProgressDialog->setValue(m_taskProgressDialog->value() + 1);
+  m_taskProgressDialog->setValue(m_taskProgressDialog->value() + amount);
 }
 
 void CharsetToolMainWindow::clearLog()

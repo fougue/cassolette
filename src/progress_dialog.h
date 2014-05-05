@@ -2,6 +2,7 @@
 #define PROGRESS_DIALOG_H
 
 #include <QtWidgets/QDialog>
+class QAbstractButton;
 
 /*! \brief Similar to QProgressDialog
  *
@@ -20,20 +21,30 @@ public:
   QString labelText() const;
   void setLabelText(const QString& text);
 
+  int minimumValue() const;
   int maximumValue() const;
-  void setMaximumValue(int value);
+  Q_SLOT void setMinimumValue(int value);
+  Q_SLOT void setMaximumValue(int value);
+  Q_SLOT void setRangeValue(int min, int max);
 
   int value() const;
-  void setValue(int value);
+  Q_SLOT void setValue(int value);
+
+  bool wasCanceled() const;
 
 public slots:
   void reset();
+  void resetCancelFlag();
 
 signals:
   void canceled();
 
+private slots:
+  void onClicked(QAbstractButton* btn);
+
 private:
   class Ui_ProgressDialog *m_ui;
+  bool m_wasCanceled;
 };
 
 #endif // PROGRESS_DIALOG_H

@@ -136,7 +136,7 @@ void CharsetDetector::asyncDetect(const QStringList &filePathList)
 
   foreach (const QString& filePath, filePathList) {
     const QFileInfo fileInfo(filePath);
-    BaseFileTask::FileResult detRes;
+    BaseFileTask::ResultItem detRes;
     detRes.filePath = fileInfo.absoluteFilePath();
     if (!fileInfo.isFile())
       detRes.errorText = tr("Not a file");
@@ -191,9 +191,9 @@ CharsetDetector::ListFilesResult CharsetDetector::listFiles(const QStringList &i
   return result;
 }
 
-BaseFileTask::FileResult CharsetDetector::detectFile(const QString &filePath)
+BaseFileTask::ResultItem CharsetDetector::detectFile(const QString &filePath)
 {
-  BaseFileTask::FileResult result;
+  BaseFileTask::ResultItem result;
 
   if (!m_detectorByThread.hasLocalData())
     m_detectorByThread.setLocalData(new internal::TextFileFormatDetector(NS_FILTER_ALL));

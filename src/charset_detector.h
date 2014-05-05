@@ -65,7 +65,7 @@ public:
                                    const QStringList& excludes = QStringList());
 
 private:
-  BaseFileTask::FileResult detectFile(const QString& filePath);
+  BaseFileTask::ResultItem detectFile(const QString& filePath);
 
   QThreadStorage<internal::TextFileFormatDetector*> m_detectorByThread;
 };

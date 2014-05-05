@@ -38,16 +38,16 @@
 #ifndef CHARSET_TOOL_MAIN_WINDOW_H
 #define CHARSET_TOOL_MAIN_WINDOW_H
 
-#include <QtWidgets/QFileIconProvider>
-#include <QtWidgets/QMainWindow>
 #include "editable_list_widget.h"
 #include "input_filter_dialog.h"
-class BaseFileTask;
+#include "base_file_task.h"
+class ProgressDialog;
+
+#include <QtWidgets/QFileIconProvider>
+#include <QtWidgets/QMainWindow>
 class CharsetDetector;
 class CharsetEncoder;
 class QTreeWidgetItem;
-
-class ProgressDialog;
 
 class CharsetToolMainWindow : public QMainWindow
 {
@@ -65,10 +65,9 @@ private slots:
   void runAnalyse();
   void runConversion();
 
-  void onAnalyseDetection(const QString& inputFile, const QVariant& payload);
-  void onEncoded(const QString& inputFile, const QVariant& payload);
+  void onDetectionBatch(const BaseFileTask::ResultBatch& batch);
+  void onEncodingBatch(const BaseFileTask::ResultBatch& batch);
   void onTaskStarted();
-  void onTaskError(const QString& inputFile, const QString& errorText);
   void onTaskAborted();
   void onTaskFinished();
 
@@ -85,10 +84,12 @@ private:
   BaseFileTask* currentTask() const;
   QString currentTaskName() const;
   void setCurrentTask(TaskId taskId);
+  void handleTaskError(const QString& inputFile, const QString& errorText);
+  void handleAbortTask();
 
   void updateTaskButtons();
   void createTaskProgressDialog(const QString& labelText, int fileCount);
-  void incrementTaskProgress();
+  void incrementTaskProgress(int amount);
   void onTaskEnded();
 
   enum LogFormat
