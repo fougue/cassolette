@@ -41,12 +41,15 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QTime>
 #include <QtWidgets/QFileDialog>
-#include <QtWidgets/QProgressDialog>
 #include <QtWidgets/QScrollBar>
+
+#include <QtCore/QCoreApplication>
+#include <QtCore/QThread>
 
 #include "charset_detector.h"
 #include "charset_encoder.h"
 #include "input_filter_dialog.h"
+#include "progress_dialog.h"
 #include "select_charset_dialog.h"
 #include "ui_charset_tool_main_window.h"
 
@@ -204,22 +207,14 @@ void CharsetToolMainWindow::runConversion()
   }
 }
 
-void CharsetToolMainWindow::handleUserAbort()
-{
-  if (m_taskProgressDialog->wasCanceled())
-    this->currentTask()->abortTask();
-}
-
 void CharsetToolMainWindow::onAnalyseDetection(const QString &inputFile, const QVariant &payload)
 {
   const QString charset = payload.toString();
-  this->incrementTaskProgress();
   QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(charset) << inputFile);
   item->setIcon(1, m_fileIconProvider.icon(QFileInfo(inputFile)));
   m_fileToItem.insert(inputFile, item);
   m_ui->analyseTreeWidget->addTopLevelItem(item);
-
-  this->handleUserAbort();
+  this->incrementTaskProgress();
 }
 
 void CharsetToolMainWindow::onEncoded(const QString &inputFile, const QVariant &payload)
@@ -231,8 +226,6 @@ void CharsetToolMainWindow::onEncoded(const QString &inputFile, const QVariant &
   QTreeWidgetItem* item = m_fileToItem.value(inputFile);
   if (item != NULL)
     item->setText(0, charset);
-
-  this->handleUserAbort();
 }
 
 void CharsetToolMainWindow::onTaskError(const QString &inputFile, const QString &errorText)
@@ -259,9 +252,8 @@ void CharsetToolMainWindow::onTaskFinished()
 void CharsetToolMainWindow::onTaskEnded()
 {
   if (m_currentTaskId != CharsetToolMainWindow::NoTask) {
+    m_taskProgressDialog->reset();
     this->setCurrentTask(CharsetToolMainWindow::NoTask);
-    delete m_taskProgressDialog;
-    m_taskProgressDialog = NULL;
   }
 }
 
@@ -314,12 +306,17 @@ void CharsetToolMainWindow::updateTaskButtons()
 
 void CharsetToolMainWindow::createTaskProgressDialog(const QString &labelText, int fileCount)
 {
-  m_taskProgressDialog = new QProgressDialog(this);
+  if (m_taskProgressDialog == NULL)
+    m_taskProgressDialog = new ProgressDialog(this);
+  else
+    QObject::disconnect(m_taskProgressDialog, &ProgressDialog::canceled, NULL, NULL);
   m_taskProgressDialog->setLabelText(labelText);
-  m_taskProgressDialog->setMaximum(fileCount);
-  m_taskProgressDialog->setWindowTitle(tr("Please wait"));
-  m_taskProgressDialog->setWindowModality(Qt::WindowModal);
-  m_taskProgressDialog->setCancelButtonText(tr("Abort"));
+  m_taskProgressDialog->setValue(0);
+  m_taskProgressDialog->setMaximumValue(fileCount);
+
+  QObject::connect(m_taskProgressDialog, &ProgressDialog::canceled,
+                   this->currentTask(), &BaseFileTask::abortTask);
+
   m_taskProgressDialog->show();
 
   this->appendLogInfo(labelText);

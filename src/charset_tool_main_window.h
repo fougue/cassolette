@@ -45,8 +45,9 @@
 class BaseFileTask;
 class CharsetDetector;
 class CharsetEncoder;
-class QProgressDialog;
 class QTreeWidgetItem;
+
+class ProgressDialog;
 
 class CharsetToolMainWindow : public QMainWindow
 {
@@ -63,7 +64,6 @@ private slots:
 
   void runAnalyse();
   void runConversion();
-  void handleUserAbort();
 
   void onAnalyseDetection(const QString& inputFile, const QVariant& payload);
   void onEncoded(const QString& inputFile, const QVariant& payload);
@@ -106,7 +106,7 @@ private:
 
   class Ui_CharsetToolMainWindow *m_ui;
   QString m_lastInputDir;
-  QProgressDialog* m_taskProgressDialog;
+  ProgressDialog* m_taskProgressDialog;
   CharsetDetector* m_csDetector;
   CharsetEncoder* m_csEncoder;
   InputFilterDialog::FilePatterns m_filterPatterns;
