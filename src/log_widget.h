@@ -47,9 +47,9 @@ class LogWidget : public QWidget
 public:
     enum LogFormat
     {
-      InfoLog,
-      WarningLog,
-      ErrorLog
+        InfoLog,
+        WarningLog,
+        ErrorLog
     };
 
     LogWidget(QWidget *parent = nullptr);

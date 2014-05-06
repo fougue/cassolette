@@ -42,35 +42,35 @@
 
 struct InputFilterDialog_FilePatterns
 {
-  InputFilterDialog_FilePatterns();
-  QStringList appliablePatterns() const;
+    InputFilterDialog_FilePatterns();
+    QStringList appliablePatterns() const;
 
-  QStringList patterns;
-  bool checked;
+    QStringList patterns;
+    bool checked;
 };
 
 class InputFilterDialog : public QDialog
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  typedef InputFilterDialog_FilePatterns FilePatterns;
+    typedef InputFilterDialog_FilePatterns FilePatterns;
 
-  InputFilterDialog(QWidget *parent = NULL);
-  ~InputFilterDialog();
+    InputFilterDialog(QWidget *parent = NULL);
+    ~InputFilterDialog();
 
-  void installFilterPatterns(const FilePatterns& fp);
-  FilePatterns filterPatterns() const;
+    void installFilterPatterns(const FilePatterns& fp);
+    FilePatterns filterPatterns() const;
 
-  void installExcludePatterns(const FilePatterns& fp);
-  FilePatterns excludePatterns() const;
+    void installExcludePatterns(const FilePatterns& fp);
+    FilePatterns excludePatterns() const;
 
 private slots:
-  void addFilterPattern();
-  void addExcludePattern();
+    void addFilterPattern();
+    void addExcludePattern();
 
 private:
-  class Ui_InputFilterDialog *m_ui;
+    class Ui_InputFilterDialog *m_ui;
 };
 
 #endif // INPUT_FILTER_DIALOG_H

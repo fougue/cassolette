@@ -51,27 +51,27 @@ namespace internal { class TextFileFormatDetector; }
  */
 class CharsetDetector : public BaseFileTask
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  CharsetDetector(QObject* parent = NULL);
+    CharsetDetector(QObject* parent = NULL);
 
-  void asyncDetect(const QStringList& filePathList);
+    void asyncDetect(const QStringList& filePathList);
 
-  struct ListFilesResult
-  {
-    QStringList files;
-    QStringList errors;
-  };
+    struct ListFilesResult
+    {
+        QStringList files;
+        QStringList errors;
+    };
 
-  static ListFilesResult listFiles(const QStringList& inputs, // Files and folders
-                                   const QStringList& filters = QStringList(),
-                                   const QStringList& excludes = QStringList());
+    static ListFilesResult listFiles(const QStringList& inputs, // Files and folders
+                                     const QStringList& filters = QStringList(),
+                                     const QStringList& excludes = QStringList());
 
 private:
-  BaseFileTask::ResultItem detectFile(const QString& filePath);
+    BaseFileTask::ResultItem detectFile(const QString& filePath);
 
-  QThreadStorage<internal::TextFileFormatDetector*> m_detectorByThread;
+    QThreadStorage<internal::TextFileFormatDetector*> m_detectorByThread;
 };
 
 #endif // CHARSET_DETECTOR_H

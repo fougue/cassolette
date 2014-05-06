@@ -48,26 +48,26 @@ class QTextCodec;
  */
 class CharsetEncoder : public BaseFileTask
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  struct InputFile
-  {
-    InputFile();
-    InputFile(const QString& pFilePath, const QByteArray& pCharset);
-    QString filePath;
-    QByteArray charset;
-  };
+    struct InputFile
+    {
+        InputFile();
+        InputFile(const QString& pFilePath, const QByteArray& pCharset);
+        QString filePath;
+        QByteArray charset;
+    };
 
-  CharsetEncoder(QObject *parent = NULL);
+    CharsetEncoder(QObject *parent = NULL);
 
-  void asyncEncode(const QByteArray& charset, const QVector<InputFile>& fileVec);
+    void asyncEncode(const QByteArray& charset, const QVector<InputFile>& fileVec);
 
 private:
-  BaseFileTask::ResultItem encodeFile(const InputFile& inputFile);
+    BaseFileTask::ResultItem encodeFile(const InputFile& inputFile);
 
-  QHash<QByteArray, QTextCodec*> m_codecCache;
-  QTextCodec *m_dstCodec;
+    QHash<QByteArray, QTextCodec*> m_codecCache;
+    QTextCodec *m_dstCodec;
 };
 
 #endif // CHARSET_ENCODER_H

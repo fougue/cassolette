@@ -49,39 +49,39 @@ class QAbstractButton;
  */
 class ProgressDialog : public QDialog
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  ProgressDialog(QWidget *parent = NULL);
-  ~ProgressDialog();
+    ProgressDialog(QWidget *parent = NULL);
+    ~ProgressDialog();
 
-  QString labelText() const;
-  void setLabelText(const QString& text);
+    QString labelText() const;
+    void setLabelText(const QString& text);
 
-  int minimumValue() const;
-  int maximumValue() const;
-  Q_SLOT void setMinimumValue(int value);
-  Q_SLOT void setMaximumValue(int value);
-  Q_SLOT void setRangeValue(int min, int max);
+    int minimumValue() const;
+    int maximumValue() const;
+    Q_SLOT void setMinimumValue(int value);
+    Q_SLOT void setMaximumValue(int value);
+    Q_SLOT void setRangeValue(int min, int max);
 
-  int value() const;
-  Q_SLOT void setValue(int value);
+    int value() const;
+    Q_SLOT void setValue(int value);
 
-  bool wasCanceled() const;
+    bool wasCanceled() const;
 
 public slots:
-  void reset();
-  void resetCancelFlag();
+    void reset();
+    void resetCancelFlag();
 
 signals:
-  void canceled();
+    void canceled();
 
 private slots:
-  void onClicked(QAbstractButton* btn);
+    void onClicked(QAbstractButton* btn);
 
 private:
-  class Ui_ProgressDialog *m_ui;
-  bool m_wasCanceled;
+    class Ui_ProgressDialog *m_ui;
+    bool m_wasCanceled;
 };
 
 #endif // PROGRESS_DIALOG_H

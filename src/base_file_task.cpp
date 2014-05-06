@@ -41,11 +41,11 @@
 #include <QtCore/QtDebug>
 
 BaseFileTask::BaseFileTask(QObject *parent)
-  : QObject(parent),
-    m_futureWatcher(NULL),
-    m_batchSize(0)
+    : QObject(parent),
+      m_futureWatcher(NULL),
+      m_batchSize(0)
 {
-  this->setBatchSize(256);
+    this->setBatchSize(256);
 }
 
 BaseFileTask::~BaseFileTask()
@@ -54,66 +54,66 @@ BaseFileTask::~BaseFileTask()
 
 void BaseFileTask::abortTask()
 {
-  if (m_futureWatcher != NULL && !m_futureWatcher->isCanceled()) {
-    m_futureWatcher->cancel();
-    m_futureWatcher->waitForFinished();
-  }
+    if (m_futureWatcher != NULL && !m_futureWatcher->isCanceled()) {
+        m_futureWatcher->cancel();
+        m_futureWatcher->waitForFinished();
+    }
 }
 
 int BaseFileTask::batchSize() const
 {
-  return m_batchSize;
+    return m_batchSize;
 }
 
 void BaseFileTask::setBatchSize(int size)
 {
-  m_batchSize = size;
-  m_batchVec.reserve(size);
+    m_batchSize = size;
+    m_batchVec.reserve(size);
 }
 
 void BaseFileTask::onTaskResultReadyAt(int resultId)
 {
-  const BaseFileTask::ResultItem fileRes = m_futureWatcher->resultAt(resultId);
-  m_batchVec.append(fileRes);
-  if (m_batchVec.size() == this->batchSize()) {
-    emit taskBatch(m_batchVec);
-    m_batchVec.clear();
-  }
+    const BaseFileTask::ResultItem fileRes = m_futureWatcher->resultAt(resultId);
+    m_batchVec.append(fileRes);
+    if (m_batchVec.size() == this->batchSize()) {
+        emit taskBatch(m_batchVec);
+        m_batchVec.clear();
+    }
 }
 
 void BaseFileTask::onFutureWatcherFinished()
 {
-  if (m_batchVec.size() < this->batchSize() && !m_futureWatcher->isCanceled()) {
-    emit taskBatch(m_batchVec);
-    m_batchVec.clear();
-  }
-  emit taskFinished();
+    if (m_batchVec.size() < this->batchSize() && !m_futureWatcher->isCanceled()) {
+        emit taskBatch(m_batchVec);
+        m_batchVec.clear();
+    }
+    emit taskFinished();
 }
 
 void BaseFileTask::onFutureWatcherCanceled()
 {
-  m_batchVec.clear();
-  emit taskAborted();
+    m_batchVec.clear();
+    emit taskAborted();
 }
 
 void BaseFileTask::createFutureWatcher()
 {
-  if (m_futureWatcher == NULL) {
-    m_futureWatcher = new QFutureWatcher<ResultItem>(this);
-    QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureWatcherFinished()));
-    QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SLOT(onFutureWatcherCanceled()));
-    QObject::connect(m_futureWatcher, SIGNAL(resultReadyAt(int)),
-                     this, SLOT(onTaskResultReadyAt(int)));
-  }
+    if (m_futureWatcher == NULL) {
+        m_futureWatcher = new QFutureWatcher<ResultItem>(this);
+        QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureWatcherFinished()));
+        QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SLOT(onFutureWatcherCanceled()));
+        QObject::connect(m_futureWatcher, SIGNAL(resultReadyAt(int)),
+                         this, SLOT(onTaskResultReadyAt(int)));
+    }
 }
 
 QFutureWatcher<BaseFileTask::ResultItem> *BaseFileTask::futureWatcher() const
 {
-  return m_futureWatcher;
+    return m_futureWatcher;
 }
 
 
 bool BaseFileTask::ResultItem::hasError() const
 {
-  return !errorText.isEmpty();
+    return !errorText.isEmpty();
 }

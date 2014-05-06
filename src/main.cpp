@@ -42,16 +42,16 @@
 
 int main(int argc, char** argv)
 {
-  QApplication app(argc, argv);
+    QApplication app(argc, argv);
 
-  // Define settings informations once
-  QCoreApplication::setOrganizationName("FougSys");
-  QCoreApplication::setOrganizationDomain("www.fougsys.fr");
-  QCoreApplication::setApplicationName(QLatin1String("charset-tool"));
-  //QCoreApplication::setApplicationVersion(versionNumber);
+    // Define settings informations once
+    QCoreApplication::setOrganizationName("FougSys");
+    QCoreApplication::setOrganizationDomain("www.fougsys.fr");
+    QCoreApplication::setApplicationName(QLatin1String("charset-tool"));
+    //QCoreApplication::setApplicationVersion(versionNumber);
 
-  CharsetToolMainWindow mainWin;
-  mainWin.show();
+    CharsetToolMainWindow mainWin;
+    mainWin.show();
 
-  return app.exec();
+    return app.exec();
 }

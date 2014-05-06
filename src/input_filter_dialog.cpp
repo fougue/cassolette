@@ -42,93 +42,93 @@ namespace internal {
 
 static QStringList allTexts(const QListWidget* listWidget)
 {
-  QStringList textList;
-  const int rowCount = listWidget->count();
-  for (int row = 0; row < rowCount; ++row)
-    textList += listWidget->item(row)->text();
-  return textList;
+    QStringList textList;
+    const int rowCount = listWidget->count();
+    for (int row = 0; row < rowCount; ++row)
+        textList += listWidget->item(row)->text();
+    return textList;
 }
 
 static void installTexts(QListWidget* listWidget, const QStringList& textList)
 {
-  listWidget->clear();
-  foreach (const QString& text, textList)
-    listWidget->addItem(text);
+    listWidget->clear();
+    foreach (const QString& text, textList)
+        listWidget->addItem(text);
 }
 
 } // namespace internal
 
 InputFilterDialog_FilePatterns::InputFilterDialog_FilePatterns()
-  : checked(true)
+    : checked(true)
 {
 }
 
 QStringList InputFilterDialog_FilePatterns::appliablePatterns() const
 {
-  return this->checked ? this->patterns : QStringList();
+    return this->checked ? this->patterns : QStringList();
 }
 
 InputFilterDialog::InputFilterDialog(QWidget *parent)
-  : QDialog(parent),
-    m_ui(new Ui::InputFilterDialog)
+    : QDialog(parent),
+      m_ui(new Ui::InputFilterDialog)
 {
-  m_ui->setupUi(this);
+    m_ui->setupUi(this);
 
-  QObject::connect(m_ui->addFilterBtn, SIGNAL(clicked()), this, SLOT(addFilterPattern()));
-  QObject::connect(m_ui->addExcludeBtn, SIGNAL(clicked()), this, SLOT(addExcludePattern()));
+    QObject::connect(m_ui->addFilterBtn, SIGNAL(clicked()), this, SLOT(addFilterPattern()));
+    QObject::connect(m_ui->addExcludeBtn, SIGNAL(clicked()), this, SLOT(addExcludePattern()));
 
-  QObject::connect(m_ui->filterCheckBox, SIGNAL(toggled(bool)), m_ui->addFilterBtn, SLOT(setEnabled(bool)));
-  QObject::connect(m_ui->filterCheckBox, SIGNAL(toggled(bool)), m_ui->filterListWidget, SLOT(setEnabled(bool)));
+    QObject::connect(m_ui->filterCheckBox, SIGNAL(toggled(bool)), m_ui->addFilterBtn, SLOT(setEnabled(bool)));
+    QObject::connect(m_ui->filterCheckBox, SIGNAL(toggled(bool)), m_ui->filterListWidget, SLOT(setEnabled(bool)));
 
-  QObject::connect(m_ui->excludeCheckBox, SIGNAL(toggled(bool)), m_ui->addExcludeBtn, SLOT(setEnabled(bool)));
-  QObject::connect(m_ui->excludeCheckBox, SIGNAL(toggled(bool)), m_ui->excludeListWidget, SLOT(setEnabled(bool)));
+    QObject::connect(m_ui->excludeCheckBox, SIGNAL(toggled(bool)), m_ui->addExcludeBtn, SLOT(setEnabled(bool)));
+    QObject::connect(m_ui->excludeCheckBox, SIGNAL(toggled(bool)), m_ui->excludeListWidget, SLOT(setEnabled(bool)));
 }
 
 InputFilterDialog::~InputFilterDialog()
 {
-  delete m_ui;
+    delete m_ui;
 }
 
 void InputFilterDialog::installFilterPatterns(const FilePatterns &fp)
 {
-  internal::installTexts(m_ui->filterListWidget, fp.patterns);
-  m_ui->filterCheckBox->setChecked(fp.checked);
+    internal::installTexts(m_ui->filterListWidget, fp.patterns);
+    m_ui->filterCheckBox->setChecked(fp.checked);
 }
 
 InputFilterDialog::FilePatterns InputFilterDialog::filterPatterns() const
 {
-  FilePatterns fp;
-  fp.checked = m_ui->filterCheckBox->isChecked();
-  fp.patterns = internal::allTexts(m_ui->filterListWidget);
-  return fp;
+    FilePatterns fp;
+    fp.checked = m_ui->filterCheckBox->isChecked();
+    fp.patterns = internal::allTexts(m_ui->filterListWidget);
+    return fp;
 }
 
 void InputFilterDialog::installExcludePatterns(const FilePatterns &fp)
 {
-  internal::installTexts(m_ui->excludeListWidget, fp.patterns);
-  m_ui->excludeCheckBox->setChecked(fp.checked);
+    internal::installTexts(m_ui->excludeListWidget, fp.patterns);
+    m_ui->excludeCheckBox->setChecked(fp.checked);
 }
 
 InputFilterDialog::FilePatterns InputFilterDialog::excludePatterns() const
 {
-  FilePatterns fp;
-  fp.checked = m_ui->excludeCheckBox->isChecked();
-  fp.patterns = internal::allTexts(m_ui->excludeListWidget);
-  return fp;
+    FilePatterns fp;
+    fp.checked = m_ui->excludeCheckBox->isChecked();
+    fp.patterns = internal::allTexts(m_ui->excludeListWidget);
+    return fp;
 }
 
 void InputFilterDialog::addFilterPattern()
 {
-  QListWidgetItem* item = new QListWidgetItem("<...>");
-  item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-  m_ui->filterListWidget->addItem(item);
-  m_ui->filterListWidget->editItem(item);
+    QListWidgetItem* item = new QListWidgetItem("<...>");
+    item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    m_ui->filterListWidget->addItem(item);
+    m_ui->filterListWidget->editItem(item);
 }
 
 void InputFilterDialog::addExcludePattern()
 {
-  QListWidgetItem* item = new QListWidgetItem("<...>");
-  item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-  m_ui->excludeListWidget->addItem(item);
-  m_ui->excludeListWidget->editItem(item);
+    QListWidgetItem* item = new QListWidgetItem("<...>");
+    item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    m_ui->excludeListWidget->addItem(item);
+    m_ui->excludeListWidget->editItem(item);
 }

@@ -51,57 +51,57 @@ class QTreeWidgetItem;
 
 class CharsetToolMainWindow : public QMainWindow
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  CharsetToolMainWindow(QWidget *parent = NULL);
-  ~CharsetToolMainWindow();
+    CharsetToolMainWindow(QWidget *parent = NULL);
+    ~CharsetToolMainWindow();
 
 private slots:
-  void addInputFiles();
-  void addInputFolder();
-  void editFilters();
+    void addInputFiles();
+    void addInputFolder();
+    void editFilters();
 
-  void runAnalyse();
-  void runConversion();
+    void runAnalyse();
+    void runConversion();
 
-  void onDetectionBatch(const BaseFileTask::ResultBatch& batch);
-  void onEncodingBatch(const BaseFileTask::ResultBatch& batch);
-  void onTaskStarted();
-  void onTaskAborted();
-  void onTaskFinished();
+    void onDetectionBatch(const BaseFileTask::ResultBatch& batch);
+    void onEncodingBatch(const BaseFileTask::ResultBatch& batch);
+    void onTaskStarted();
+    void onTaskAborted();
+    void onTaskFinished();
 
 private:
-  enum TaskId
-  {
-    NoTask,
-    AnalyseTask,
-    ConversionTask
-  };
+    enum TaskId
+    {
+        NoTask,
+        AnalyseTask,
+        ConversionTask
+    };
 
-  void connectTask(const BaseFileTask* task);
+    void connectTask(const BaseFileTask* task);
 
-  BaseFileTask* currentTask() const;
-  QString currentTaskName() const;
-  void setCurrentTask(TaskId taskId);
-  void handleTaskError(const QString& inputFile, const QString& errorText);
-  void handleAbortTask();
+    BaseFileTask* currentTask() const;
+    QString currentTaskName() const;
+    void setCurrentTask(TaskId taskId);
+    void handleTaskError(const QString& inputFile, const QString& errorText);
+    void handleAbortTask();
 
-  void updateTaskButtons();
-  void createTaskProgressDialog(const QString& labelText, int fileCount);
-  void incrementTaskProgress(int amount);
-  void onTaskEnded();
+    void updateTaskButtons();
+    void createTaskProgressDialog(const QString& labelText, int fileCount);
+    void incrementTaskProgress(int amount);
+    void onTaskEnded();
 
-  class Ui_CharsetToolMainWindow *m_ui;
-  QString m_lastInputDir;
-  ProgressDialog* m_taskProgressDialog;
-  CharsetDetector* m_csDetector;
-  CharsetEncoder* m_csEncoder;
-  InputFilterDialog::FilePatterns m_filterPatterns;
-  InputFilterDialog::FilePatterns m_excludePatterns;
-  TaskId m_currentTaskId;
-  QHash<QString, QTreeWidgetItem*> m_fileToItem;
-  QFileIconProvider m_fileIconProvider;
+    class Ui_CharsetToolMainWindow *m_ui;
+    QString m_lastInputDir;
+    ProgressDialog* m_taskProgressDialog;
+    CharsetDetector* m_csDetector;
+    CharsetEncoder* m_csEncoder;
+    InputFilterDialog::FilePatterns m_filterPatterns;
+    InputFilterDialog::FilePatterns m_excludePatterns;
+    TaskId m_currentTaskId;
+    QHash<QString, QTreeWidgetItem*> m_fileToItem;
+    QFileIconProvider m_fileIconProvider;
 };
 
 #endif // CHARSET_TOOL_MAIN_WINDOW_H

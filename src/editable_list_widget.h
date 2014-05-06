@@ -42,16 +42,16 @@
 
 class EditableListWidget : public QListWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  EditableListWidget(QWidget* parent = NULL);
+    EditableListWidget(QWidget* parent = NULL);
 
 private slots:
-  void onItemButtonClicked(int btnId, const QModelIndex& index);
+    void onItemButtonClicked(int btnId, const QModelIndex& index);
 
 private:
-  QString m_itemName;
+    QString m_itemName;
 };
 
 #endif // EDITABLE_LIST_WIDGET_H

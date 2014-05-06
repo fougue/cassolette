@@ -60,166 +60,166 @@ namespace internal {
 class TextFileFormatDetector : public nsUniversalDetector
 {
 public:
-  TextFileFormatDetector(PRUint32 langFilter);
+    TextFileFormatDetector(PRUint32 langFilter);
 
-  const char* detectedEncodingName() const;
-  void init();
+    const char* detectedEncodingName() const;
+    void init();
 
 protected:
-  void Report(const char* charset);
-  void Reset();
+    void Report(const char* charset);
+    void Reset();
 
 private:
-  const char* m_detectedEncodingName;
+    const char* m_detectedEncodingName;
 };
 
 TextFileFormatDetector::TextFileFormatDetector(PRUint32 langFilter)
-  : nsUniversalDetector(langFilter),
-    m_detectedEncodingName(NULL)
+    : nsUniversalDetector(langFilter),
+      m_detectedEncodingName(NULL)
 {
 }
 
 const char *TextFileFormatDetector::detectedEncodingName() const
 {
-  return m_detectedEncodingName;
+    return m_detectedEncodingName;
 }
 
 void TextFileFormatDetector::init()
 {
-  this->Reset();
+    this->Reset();
 }
 
 void TextFileFormatDetector::Report(const char *charset)
 {
-  m_detectedEncodingName = charset;
+    m_detectedEncodingName = charset;
 }
 
 void TextFileFormatDetector::Reset()
 {
-  nsUniversalDetector::Reset();
-  m_detectedEncodingName = NULL;
+    nsUniversalDetector::Reset();
+    m_detectedEncodingName = NULL;
 }
 
 static bool acceptInputFile(const QString& file,
                             const QVector<QRegExp>& filterRxVec,
                             const QVector<QRegExp>& excludeRxVec)
 {
-  bool passFilter = filterRxVec.isEmpty();
-  foreach (const QRegExp& filterRx, filterRxVec) {
-    if (filterRx.indexIn(file) != -1) {
-      passFilter = true;
-      break;
+    bool passFilter = filterRxVec.isEmpty();
+    foreach (const QRegExp& filterRx, filterRxVec) {
+        if (filterRx.indexIn(file) != -1) {
+            passFilter = true;
+            break;
+        }
     }
-  }
 
-  if (passFilter) {
-    foreach (const QRegExp& excludeRx, excludeRxVec) {
-      if (excludeRx.indexIn(file) != -1)
-        return false;
+    if (passFilter) {
+        foreach (const QRegExp& excludeRx, excludeRxVec) {
+            if (excludeRx.indexIn(file) != -1)
+                return false;
+        }
     }
-  }
 
-  return passFilter;
+    return passFilter;
 }
 
 } // namespace internal
 
 CharsetDetector::CharsetDetector(QObject *parent)
-  : BaseFileTask(parent)
+    : BaseFileTask(parent)
 {
-  this->createFutureWatcher();
+    this->createFutureWatcher();
 }
 
 void CharsetDetector::asyncDetect(const QStringList &filePathList)
 {
-  emit taskStarted();
+    emit taskStarted();
 
-  foreach (const QString& filePath, filePathList) {
-    const QFileInfo fileInfo(filePath);
-    BaseFileTask::ResultItem detRes;
-    detRes.filePath = fileInfo.absoluteFilePath();
-    if (!fileInfo.isFile())
-      detRes.errorText = tr("Not a file");
-  }
+    foreach (const QString& filePath, filePathList) {
+        const QFileInfo fileInfo(filePath);
+        BaseFileTask::ResultItem detRes;
+        detRes.filePath = fileInfo.absoluteFilePath();
+        if (!fileInfo.isFile())
+            detRes.errorText = tr("Not a file");
+    }
 
-  auto future = QtConcurrent::mapped(filePathList, std::bind(&CharsetDetector::detectFile,
-                                                             this,
-                                                             std::placeholders::_1));
-  this->futureWatcher()->setFuture(future);
+    auto future = QtConcurrent::mapped(filePathList, std::bind(&CharsetDetector::detectFile,
+                                                               this,
+                                                               std::placeholders::_1));
+    this->futureWatcher()->setFuture(future);
 }
 
 CharsetDetector::ListFilesResult CharsetDetector::listFiles(const QStringList &inputs,
                                                             const QStringList &filters,
                                                             const QStringList &excludes)
 {
-  QVector<QRegExp> filterRxVec;
-  QVector<QRegExp> excludeRxVec;
+    QVector<QRegExp> filterRxVec;
+    QVector<QRegExp> excludeRxVec;
 
-  foreach (const QString& filter, filters)
-    filterRxVec.append(QRegExp(filter, Qt::CaseSensitive, QRegExp::Wildcard));
-  foreach (const QString& exclude, excludes)
-    excludeRxVec.append(QRegExp(exclude, Qt::CaseSensitive, QRegExp::Wildcard));
+    foreach (const QString& filter, filters)
+        filterRxVec.append(QRegExp(filter, Qt::CaseSensitive, QRegExp::Wildcard));
+    foreach (const QString& exclude, excludes)
+        excludeRxVec.append(QRegExp(exclude, Qt::CaseSensitive, QRegExp::Wildcard));
 
-  CharsetDetector::ListFilesResult result;
+    CharsetDetector::ListFilesResult result;
 
-  foreach (const QString& input, inputs) {
-    const QFileInfo inputInfo(input);
-    if (inputInfo.isFile()
-        && internal::acceptInputFile(inputInfo.absoluteFilePath(), filterRxVec, excludeRxVec))
-    {
-      result.files += inputInfo.absoluteFilePath();
-    }
-    else if (inputInfo.isDir()) {
-      if (inputInfo.exists()) {
-        QDirIterator dirIt(inputInfo.absoluteFilePath(), QDirIterator::Subdirectories);
-        while (dirIt.hasNext()) {
-          dirIt.next();
-          const QFileInfo fileInfo = dirIt.fileInfo();
-          if (fileInfo.isFile()
-              && internal::acceptInputFile(fileInfo.absoluteFilePath(), filterRxVec, excludeRxVec))
-          {
-            result.files += fileInfo.absoluteFilePath();
-          }
+    foreach (const QString& input, inputs) {
+        const QFileInfo inputInfo(input);
+        if (inputInfo.isFile()
+                && internal::acceptInputFile(inputInfo.absoluteFilePath(), filterRxVec, excludeRxVec))
+        {
+            result.files += inputInfo.absoluteFilePath();
         }
-      }
-      else {
-        result.errors += tr("Folder '%1' does not exist").arg(inputInfo.absoluteFilePath());
-      }
-    }
-  } // end foreach
+        else if (inputInfo.isDir()) {
+            if (inputInfo.exists()) {
+                QDirIterator dirIt(inputInfo.absoluteFilePath(), QDirIterator::Subdirectories);
+                while (dirIt.hasNext()) {
+                    dirIt.next();
+                    const QFileInfo fileInfo = dirIt.fileInfo();
+                    if (fileInfo.isFile()
+                            && internal::acceptInputFile(fileInfo.absoluteFilePath(), filterRxVec, excludeRxVec))
+                    {
+                        result.files += fileInfo.absoluteFilePath();
+                    }
+                }
+            }
+            else {
+                result.errors += tr("Folder '%1' does not exist").arg(inputInfo.absoluteFilePath());
+            }
+        }
+    } // end foreach
 
-  return result;
+    return result;
 }
 
 BaseFileTask::ResultItem CharsetDetector::detectFile(const QString &filePath)
 {
-  BaseFileTask::ResultItem result;
+    BaseFileTask::ResultItem result;
 
-  if (!m_detectorByThread.hasLocalData())
-    m_detectorByThread.setLocalData(new internal::TextFileFormatDetector(NS_FILTER_ALL));
-  internal::TextFileFormatDetector* formatDetector = m_detectorByThread.localData();
+    if (!m_detectorByThread.hasLocalData())
+        m_detectorByThread.setLocalData(new internal::TextFileFormatDetector(NS_FILTER_ALL));
+    internal::TextFileFormatDetector* formatDetector = m_detectorByThread.localData();
 
-  const QFileInfo fileInfo(filePath);
-  result.filePath = fileInfo.absoluteFilePath();
-  if (fileInfo.isFile()) {
-    QFile file(result.filePath);
-    if (file.open(QIODevice::ReadOnly)) {
-      const QByteArray fileContents = file.readAll();
-      formatDetector->init();
-      const nsresult handleRes = formatDetector->HandleData(fileContents.constData(),
-                                                            fileContents.size());
-      formatDetector->DataEnd();
-      if (handleRes == NS_OK && formatDetector->detectedEncodingName() != NULL)
-        result.payload = formatDetector->detectedEncodingName();
+    const QFileInfo fileInfo(filePath);
+    result.filePath = fileInfo.absoluteFilePath();
+    if (fileInfo.isFile()) {
+        QFile file(result.filePath);
+        if (file.open(QIODevice::ReadOnly)) {
+            const QByteArray fileContents = file.readAll();
+            formatDetector->init();
+            const nsresult handleRes = formatDetector->HandleData(fileContents.constData(),
+                                                                  fileContents.size());
+            formatDetector->DataEnd();
+            if (handleRes == NS_OK && formatDetector->detectedEncodingName() != NULL)
+                result.payload = formatDetector->detectedEncodingName();
+        }
+        else {
+            result.errorText = !file.errorString().isEmpty() ? file.errorString() :
+                                                               tr("Unknonw error");
+        }
     }
     else {
-      result.errorText = !file.errorString().isEmpty() ? file.errorString() :
-                                                         tr("Unknonw error");
+        result.errorText = tr("Not a file");
     }
-  }
-  else {
-    result.errorText = tr("Not a file");
-  }
 
-  return result;
+    return result;
 }

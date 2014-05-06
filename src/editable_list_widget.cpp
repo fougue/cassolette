@@ -40,26 +40,26 @@
 #include <fougtools/qttools/gui/item_view_buttons.h>
 
 EditableListWidget::EditableListWidget(QWidget *parent)
-  : QListWidget(parent)
+    : QListWidget(parent)
 {
-  qttools::ItemViewButtons* itemBtns = new qttools::ItemViewButtons(this, this);
+    qttools::ItemViewButtons* itemBtns = new qttools::ItemViewButtons(this, this);
 
-  QIcon removeIcon;
-  removeIcon.addPixmap(QPixmap(":/images/list-remove.png"), QIcon::Normal);
-  removeIcon.addPixmap(QPixmap(":/images/list-remove_active.png"), QIcon::Active);
+    QIcon removeIcon;
+    removeIcon.addPixmap(QPixmap(":/images/list-remove.png"), QIcon::Normal);
+    removeIcon.addPixmap(QPixmap(":/images/list-remove_active.png"), QIcon::Active);
 
-  itemBtns->installDefaultItemDelegate();
-  itemBtns->addButton(0);
-  itemBtns->setButtonIcon(0, removeIcon);
-  itemBtns->setButtonToolTip(0, tr("Delete item"));
-  itemBtns->setButtonDetection(0, -1, QVariant());
-  QObject::connect(itemBtns, SIGNAL(buttonClicked(int,QModelIndex)),
-                   this, SLOT(onItemButtonClicked(int,QModelIndex)));
+    itemBtns->installDefaultItemDelegate();
+    itemBtns->addButton(0);
+    itemBtns->setButtonIcon(0, removeIcon);
+    itemBtns->setButtonToolTip(0, tr("Delete item"));
+    itemBtns->setButtonDetection(0, -1, QVariant());
+    QObject::connect(itemBtns, SIGNAL(buttonClicked(int,QModelIndex)),
+                     this, SLOT(onItemButtonClicked(int,QModelIndex)));
 }
 
 void EditableListWidget::onItemButtonClicked(int btnId, const QModelIndex &index)
 {
-  if (btnId == 0) { // "Delete" button
-    this->model()->removeRow(index.row());
-  }
+    if (btnId == 0) { // "Delete" button
+        this->model()->removeRow(index.row());
+    }
 }

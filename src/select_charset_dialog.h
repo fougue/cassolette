@@ -43,22 +43,22 @@ class QSortFilterProxyModel;
 
 class SelectCharsetDialog : public QDialog
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  SelectCharsetDialog(QWidget *parent = NULL);
-  ~SelectCharsetDialog();
+    SelectCharsetDialog(QWidget *parent = NULL);
+    ~SelectCharsetDialog();
 
-  QByteArray selectedCharset() const;
+    QByteArray selectedCharset() const;
 
-  void accept();
+    void accept();
 
 private slots:
-  void onFilterChanged(const QString& filter);
+    void onFilterChanged(const QString& filter);
 
 private:
-  class Ui_SelectCharsetDialog *m_ui;
-  QSortFilterProxyModel* m_filterCodecModel;
+    class Ui_SelectCharsetDialog *m_ui;
+    QSortFilterProxyModel* m_filterCodecModel;
 };
 
 #endif // SELECT_CHARSET_DIALOG_H

@@ -45,46 +45,46 @@ template<typename T> class QFutureWatcher;
 
 class BaseFileTask : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  struct ResultItem
-  {
-    QString  filePath;
-    QVariant payload;
-    QString  errorText;
-    bool hasError() const;
-  };
-  typedef QVector<BaseFileTask::ResultItem> ResultBatch;
+    struct ResultItem
+    {
+        QString  filePath;
+        QVariant payload;
+        QString  errorText;
+        bool hasError() const;
+    };
+    typedef QVector<BaseFileTask::ResultItem> ResultBatch;
 
-  BaseFileTask(QObject* parent = NULL);
-  ~BaseFileTask();
+    BaseFileTask(QObject* parent = NULL);
+    ~BaseFileTask();
 
-  Q_SLOT virtual void abortTask();
+    Q_SLOT virtual void abortTask();
 
-  int batchSize() const;
-  void setBatchSize(int size);
+    int batchSize() const;
+    void setBatchSize(int size);
 
 signals:
-  void taskStarted();
-  void taskBatch(const BaseFileTask::ResultBatch& batch);
-  void taskFinished();
-  void taskAborted();
+    void taskStarted();
+    void taskBatch(const BaseFileTask::ResultBatch& batch);
+    void taskFinished();
+    void taskAborted();
 
 protected:
-  void createFutureWatcher();
-  QFutureWatcher<BaseFileTask::ResultItem> *futureWatcher() const;
+    void createFutureWatcher();
+    QFutureWatcher<BaseFileTask::ResultItem> *futureWatcher() const;
 
-  Q_SLOT virtual void onTaskResultReadyAt(int resultId);
+    Q_SLOT virtual void onTaskResultReadyAt(int resultId);
 
 private slots:
-  void onFutureWatcherFinished();
-  void onFutureWatcherCanceled();
+    void onFutureWatcherFinished();
+    void onFutureWatcherCanceled();
 
 private:
-  QFutureWatcher<BaseFileTask::ResultItem>* m_futureWatcher;
-  int m_batchSize;
-  QVector<ResultItem> m_batchVec;
+    QFutureWatcher<BaseFileTask::ResultItem>* m_futureWatcher;
+    int m_batchSize;
+    QVector<ResultItem> m_batchVec;
 };
 
 #endif // BASE_FILE_TASK_H
