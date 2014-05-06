@@ -49,6 +49,7 @@ ProgressDialog::ProgressDialog(QWidget *parent)
     m_ui->setupUi(this);
     m_ui->progressBar->setMinimum(0);
     m_ui->progressBar->setValue(0);
+    m_ui->stackedWidget->setCurrentWidget(m_ui->progressPage);
     this->setModal(true);
 
     QObject::connect(m_ui->buttonBox, &QDialogButtonBox::clicked, this, &ProgressDialog::onClicked);
@@ -61,12 +62,12 @@ ProgressDialog::~ProgressDialog()
 
 QString ProgressDialog::labelText() const
 {
-    return m_ui->label->text();
+    return m_ui->progressLabel->text();
 }
 
 void ProgressDialog::setLabelText(const QString &text)
 {
-    m_ui->label->setText(text);
+    m_ui->progressLabel->setText(text);
 }
 
 int ProgressDialog::minimumValue() const
@@ -112,6 +113,7 @@ bool ProgressDialog::wasCanceled() const
 void ProgressDialog::reset()
 {
     this->close();
+    m_ui->stackedWidget->setCurrentWidget(m_ui->progressPage);
 }
 
 void ProgressDialog::resetCancelFlag()
@@ -121,6 +123,8 @@ void ProgressDialog::resetCancelFlag()
 
 void ProgressDialog::onClicked(QAbstractButton *btn)
 {
-    if (btn == m_ui->buttonBox->button(QDialogButtonBox::Abort))
+    if (btn == m_ui->buttonBox->button(QDialogButtonBox::Abort)) {
+        m_ui->stackedWidget->setCurrentWidget(m_ui->abortPage);
         m_wasCanceled = true;
+    }
 }

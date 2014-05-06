@@ -247,6 +247,7 @@ void CharsetToolMainWindow::runConversion()
 void CharsetToolMainWindow::onTaskResultItem(const BaseFileTask::ResultItem &resultItem)
 {
     this->handleAbortTask();
+
     if (!resultItem.hasError()) {
         AbstractTaskHelper* taskHelper = m_taskIdToTaskHelper.value(m_currentTaskId, nullptr);
         if (taskHelper != nullptr)
@@ -272,6 +273,7 @@ void CharsetToolMainWindow::handleTaskError(const QString &inputFile, const QStr
 void CharsetToolMainWindow::onTaskAborted()
 {
     m_ui->pageLog->appendLogInfo(tr("%1 aborted").arg(this->currentTaskName()));
+    m_taskProgressDialog->resetCancelFlag();
     this->onTaskEnded();
 }
 
