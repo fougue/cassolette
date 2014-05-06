@@ -45,6 +45,10 @@
 
 namespace internal { class TextFileFormatDetector; }
 
+/*! \brief Provides detection of the character set used to encode a file
+ *
+ *  BaseFileTask::ResultItem::payload contains the detected character set
+ */
 class CharsetDetector : public BaseFileTask
 {
   Q_OBJECT

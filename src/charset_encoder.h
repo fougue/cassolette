@@ -42,6 +42,10 @@
 #include <QtCore/QHash>
 class QTextCodec;
 
+/*! \brief Provides encoding of files to a target character set
+ *
+ *  BaseFileTask::ResultItem::payload contains the target character set
+ */
 class CharsetEncoder : public BaseFileTask
 {
   Q_OBJECT
