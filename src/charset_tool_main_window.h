@@ -65,8 +65,7 @@ private slots:
     void runAnalyse();
     void runConversion();
 
-    void onDetectionBatch(const BaseFileTask::ResultBatch& batch);
-    void onEncodingBatch(const BaseFileTask::ResultBatch& batch);
+    void onTaskResultItem(const BaseFileTask::ResultItem& resultItem);
     void onTaskStarted();
     void onTaskAborted();
     void onTaskFinished();
@@ -87,9 +86,29 @@ private:
     void handleTaskError(const QString& inputFile, const QString& errorText);
     void handleAbortTask();
 
+    class AbstractTaskHelper
+    {
+    public:
+        AbstractTaskHelper(CharsetToolMainWindow* backPtr)
+            : m_backPtr(backPtr)
+        { }
+
+        virtual ~AbstractTaskHelper() {}
+
+        virtual void reset() { }
+        virtual void handleResultItem(const BaseFileTask::ResultItem& resultItem) = 0;
+        virtual void handleTaskFinished() { }
+
+        CharsetToolMainWindow* m_backPtr;
+    };
+    class AnalyseTaskHelper;
+    class ConversionTaskHelper;
+    friend class AnalyseTaskHelper;
+    friend class ConversionTaskHelper;
+
     void updateTaskButtons();
     void createTaskProgressDialog(const QString& labelText, int fileCount);
-    void incrementTaskProgress(int amount);
+    void incrementTaskProgress(int amount = 1);
     void onTaskEnded();
 
     class Ui_CharsetToolMainWindow *m_ui;
@@ -102,6 +121,8 @@ private:
     TaskId m_currentTaskId;
     QHash<QString, QTreeWidgetItem*> m_fileToItem;
     QFileIconProvider m_fileIconProvider;
+
+    QHash<TaskId, AbstractTaskHelper*> m_taskIdToTaskHelper;
 };
 
 #endif // CHARSET_TOOL_MAIN_WINDOW_H

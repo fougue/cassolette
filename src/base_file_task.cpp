@@ -42,10 +42,8 @@
 
 BaseFileTask::BaseFileTask(QObject *parent)
     : QObject(parent),
-      m_futureWatcher(nullptr),
-      m_batchSize(0)
+      m_futureWatcher(nullptr)
 {
-    this->setBatchSize(256);
 }
 
 BaseFileTask::~BaseFileTask()
@@ -60,48 +58,18 @@ void BaseFileTask::abortTask()
     }
 }
 
-int BaseFileTask::batchSize() const
-{
-    return m_batchSize;
-}
-
-void BaseFileTask::setBatchSize(int size)
-{
-    m_batchSize = size;
-    m_batchVec.reserve(size);
-}
-
 void BaseFileTask::onTaskResultReadyAt(int resultId)
 {
-    const BaseFileTask::ResultItem fileRes = m_futureWatcher->resultAt(resultId);
-    m_batchVec.append(fileRes);
-    if (m_batchVec.size() == this->batchSize()) {
-        emit taskBatch(m_batchVec);
-        m_batchVec.clear();
-    }
-}
-
-void BaseFileTask::onFutureWatcherFinished()
-{
-    if (m_batchVec.size() < this->batchSize() && !m_futureWatcher->isCanceled()) {
-        emit taskBatch(m_batchVec);
-        m_batchVec.clear();
-    }
-    emit taskFinished();
-}
-
-void BaseFileTask::onFutureWatcherCanceled()
-{
-    m_batchVec.clear();
-    emit taskAborted();
+    const BaseFileTask::ResultItem res = m_futureWatcher->resultAt(resultId);
+    emit taskResultItem(res);
 }
 
 void BaseFileTask::createFutureWatcher()
 {
     if (m_futureWatcher == nullptr) {
         m_futureWatcher = new QFutureWatcher<ResultItem>(this);
-        QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureWatcherFinished()));
-        QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SLOT(onFutureWatcherCanceled()));
+        QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SIGNAL(taskFinished()));
+        QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SIGNAL(taskAborted()));
         QObject::connect(m_futureWatcher, SIGNAL(resultReadyAt(int)),
                          this, SLOT(onTaskResultReadyAt(int)));
     }

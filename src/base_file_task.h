@@ -40,7 +40,6 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
-#include <QtCore/QVector>
 template<typename T> class QFutureWatcher;
 
 class BaseFileTask : public QObject
@@ -55,19 +54,15 @@ public:
         QString  errorText;
         bool hasError() const;
     };
-    typedef QVector<BaseFileTask::ResultItem> ResultBatch;
 
     BaseFileTask(QObject* parent = nullptr);
     ~BaseFileTask();
 
     Q_SLOT virtual void abortTask();
 
-    int batchSize() const;
-    void setBatchSize(int size);
-
 signals:
     void taskStarted();
-    void taskBatch(const BaseFileTask::ResultBatch& batch);
+    void taskResultItem(const BaseFileTask::ResultItem& item);
     void taskFinished();
     void taskAborted();
 
@@ -77,14 +72,8 @@ protected:
 
     Q_SLOT virtual void onTaskResultReadyAt(int resultId);
 
-private slots:
-    void onFutureWatcherFinished();
-    void onFutureWatcherCanceled();
-
 private:
     QFutureWatcher<BaseFileTask::ResultItem>* m_futureWatcher;
-    int m_batchSize;
-    QVector<ResultItem> m_batchVec;
 };
 
 #endif // BASE_FILE_TASK_H

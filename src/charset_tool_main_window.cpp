@@ -53,6 +53,60 @@
 #include "progress_dialog.h"
 //#include <QtWidgets/QProgressDialog>
 
+class CharsetToolMainWindow::AnalyseTaskHelper : public CharsetToolMainWindow::AbstractTaskHelper
+{
+public:
+    AnalyseTaskHelper(CharsetToolMainWindow* backPtr)
+        : AbstractTaskHelper(backPtr)
+    { }
+
+    void reset()
+    {
+        m_fileItemBatch.clear();
+    }
+
+    void handleResultItem(const BaseFileTask::ResultItem& resultItem)
+    {
+        const QString charset = resultItem.payload.toString();
+        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(charset) << resultItem.filePath);
+        item->setIcon(1, m_backPtr->m_fileIconProvider.icon(QFileInfo(resultItem.filePath)));
+        m_backPtr->m_fileToItem.insert(resultItem.filePath, item);
+        m_fileItemBatch.append(item);
+        if (m_fileItemBatch.size() == AnalyseTaskHelper::fileItemBatchSize) {
+            m_backPtr->m_ui->analyseTreeWidget->addTopLevelItems(m_fileItemBatch);
+            m_fileItemBatch.clear();
+        }
+    }
+
+    void handleTaskFinished()
+    {
+        if (!m_fileItemBatch.isEmpty())
+            m_backPtr->m_ui->analyseTreeWidget->addTopLevelItems(m_fileItemBatch);
+    }
+
+private:
+    static const int fileItemBatchSize = 128;
+    QList<QTreeWidgetItem*> m_fileItemBatch;
+};
+
+class CharsetToolMainWindow::ConversionTaskHelper : public CharsetToolMainWindow::AbstractTaskHelper
+{
+public:
+    ConversionTaskHelper(CharsetToolMainWindow* backPtr)
+        : AbstractTaskHelper(backPtr)
+    { }
+
+    void handleResultItem(const BaseFileTask::ResultItem& resultItem)
+    {
+        const QString charset = resultItem.payload.toString();
+        m_backPtr->m_ui->pageLog->appendLogInfo(tr("Converted %1 to %2").arg(resultItem.filePath, charset));
+        // Update detected charset
+        QTreeWidgetItem* item = m_backPtr->m_fileToItem.value(resultItem.filePath);
+        if (item != nullptr)
+            item->setText(0, charset);
+    }
+};
+
 CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
     : QMainWindow(parent),
       m_ui(new Ui_CharsetToolMainWindow),
@@ -73,15 +127,15 @@ CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
                      this, &CharsetToolMainWindow::updateTaskButtons);
 
     // Task "analyse"
+    m_taskIdToTaskHelper.insert(CharsetToolMainWindow::AnalyseTask,
+                                new CharsetToolMainWindow::AnalyseTaskHelper(this));
     this->connectTask(m_csDetector);
-    QObject::connect(m_csDetector, &CharsetDetector::taskBatch,
-                     this, &CharsetToolMainWindow::onDetectionBatch);
     m_csDetector->setObjectName(tr("Analyse"));
 
     // Task "conversion"
+    m_taskIdToTaskHelper.insert(CharsetToolMainWindow::ConversionTask,
+                                new CharsetToolMainWindow::ConversionTaskHelper(this));
     this->connectTask(m_csEncoder);
-    QObject::connect(m_csEncoder, &CharsetEncoder::taskBatch,
-                     this, &CharsetToolMainWindow::onEncodingBatch);
     m_csEncoder->setObjectName(tr("Conversion"));
 
     // Init
@@ -190,45 +244,19 @@ void CharsetToolMainWindow::runConversion()
     }
 }
 
-void CharsetToolMainWindow::onDetectionBatch(const BaseFileTask::ResultBatch &batch)
+void CharsetToolMainWindow::onTaskResultItem(const BaseFileTask::ResultItem &resultItem)
 {
-    QList<QTreeWidgetItem*> itemList;
-    foreach (const BaseFileTask::ResultItem& result, batch) {
-        this->handleAbortTask();
-        if (!result.hasError()) {
-            const QString charset = result.payload.toString();
-            QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(charset) << result.filePath);
-            item->setIcon(1, m_fileIconProvider.icon(QFileInfo(result.filePath)));
-            m_fileToItem.insert(result.filePath, item);
-            itemList.append(item);
-        }
-        else {
-            this->handleTaskError(result.filePath, result.errorText);
-        }
+    this->handleAbortTask();
+    if (!resultItem.hasError()) {
+        AbstractTaskHelper* taskHelper = m_taskIdToTaskHelper.value(m_currentTaskId, nullptr);
+        if (taskHelper != nullptr)
+            taskHelper->handleResultItem(resultItem);
+    }
+    else {
+        this->handleTaskError(resultItem.filePath, resultItem.errorText);
     }
 
-    this->incrementTaskProgress(batch.size());
-    m_ui->analyseTreeWidget->addTopLevelItems(itemList);
-}
-
-void CharsetToolMainWindow::onEncodingBatch(const BaseFileTask::ResultBatch &batch)
-{
-    foreach (const BaseFileTask::ResultItem& result, batch) {
-        this->handleAbortTask();
-        if (!result.hasError()) {
-            const QString charset = result.payload.toString();
-            m_ui->pageLog->appendLogInfo(tr("Converted %1 to %2").arg(result.filePath).arg(charset));
-            // Update detected charset
-            QTreeWidgetItem* item = m_fileToItem.value(result.filePath);
-            if (item != nullptr)
-                item->setText(0, charset);
-        }
-        else {
-            this->handleTaskError(result.filePath, result.errorText);
-        }
-    }
-
-    this->incrementTaskProgress(batch.size());
+    this->incrementTaskProgress();
 }
 
 void CharsetToolMainWindow::onTaskStarted()
@@ -251,8 +279,10 @@ void CharsetToolMainWindow::onTaskFinished()
 {
     // taskFinished() is emitted after taskAborted(), so we check if there is any task running to
     //   avoid displaying any superfluous "<Task> ended" log message
-    if (m_currentTaskId != CharsetToolMainWindow::NoTask)
+    if (m_currentTaskId != CharsetToolMainWindow::NoTask) {
         m_ui->pageLog->appendLogInfo(tr("%1 finished").arg(this->currentTaskName()));
+        m_taskIdToTaskHelper.value(m_currentTaskId)->handleTaskFinished();
+    }
     this->onTaskEnded();
 }
 
@@ -266,6 +296,8 @@ void CharsetToolMainWindow::onTaskEnded()
 
 void CharsetToolMainWindow::connectTask(const BaseFileTask *task)
 {
+    QObject::connect(task, &BaseFileTask::taskResultItem,
+                     this, &CharsetToolMainWindow::onTaskResultItem);
     QObject::connect(task, &BaseFileTask::taskAborted,
                      this, &CharsetToolMainWindow::onTaskAborted);
     QObject::connect(task, &BaseFileTask::taskFinished,
@@ -293,6 +325,9 @@ QString CharsetToolMainWindow::currentTaskName() const
 void CharsetToolMainWindow::setCurrentTask(CharsetToolMainWindow::TaskId taskId)
 {
     m_currentTaskId = taskId;
+    AbstractTaskHelper* taskHelper = m_taskIdToTaskHelper.value(taskId, nullptr);
+    if (taskHelper != nullptr)
+        taskHelper->reset();
     this->updateTaskButtons();
 }
 
