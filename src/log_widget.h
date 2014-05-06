@@ -35,73 +35,34 @@
 **
 ****************************************************************************/
 
-#ifndef CHARSET_TOOL_MAIN_WINDOW_H
-#define CHARSET_TOOL_MAIN_WINDOW_H
+#ifndef LOG_WIDGET_H
+#define LOG_WIDGET_H
 
-#include "editable_list_widget.h"
-#include "input_filter_dialog.h"
-#include "base_file_task.h"
-class ProgressDialog;
+#include <QtWidgets/QWidget>
 
-#include <QtWidgets/QFileIconProvider>
-#include <QtWidgets/QMainWindow>
-class CharsetDetector;
-class CharsetEncoder;
-class QTreeWidgetItem;
-
-class CharsetToolMainWindow : public QMainWindow
+class LogWidget : public QWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  CharsetToolMainWindow(QWidget *parent = NULL);
-  ~CharsetToolMainWindow();
+    enum LogFormat
+    {
+      InfoLog,
+      WarningLog,
+      ErrorLog
+    };
 
-private slots:
-  void addInputFiles();
-  void addInputFolder();
-  void editFilters();
+    LogWidget(QWidget *parent = nullptr);
+    ~LogWidget();
 
-  void runAnalyse();
-  void runConversion();
-
-  void onDetectionBatch(const BaseFileTask::ResultBatch& batch);
-  void onEncodingBatch(const BaseFileTask::ResultBatch& batch);
-  void onTaskStarted();
-  void onTaskAborted();
-  void onTaskFinished();
+    void clearLog();
+    void appendLogInfo(const QString& msg);
+    void appendLogWarning(const QString& msg);
+    void appendLogError(const QString& msg);
+    void appendLog(const QString& msg, LogFormat format);
 
 private:
-  enum TaskId
-  {
-    NoTask,
-    AnalyseTask,
-    ConversionTask
-  };
-
-  void connectTask(const BaseFileTask* task);
-
-  BaseFileTask* currentTask() const;
-  QString currentTaskName() const;
-  void setCurrentTask(TaskId taskId);
-  void handleTaskError(const QString& inputFile, const QString& errorText);
-  void handleAbortTask();
-
-  void updateTaskButtons();
-  void createTaskProgressDialog(const QString& labelText, int fileCount);
-  void incrementTaskProgress(int amount);
-  void onTaskEnded();
-
-  class Ui_CharsetToolMainWindow *m_ui;
-  QString m_lastInputDir;
-  ProgressDialog* m_taskProgressDialog;
-  CharsetDetector* m_csDetector;
-  CharsetEncoder* m_csEncoder;
-  InputFilterDialog::FilePatterns m_filterPatterns;
-  InputFilterDialog::FilePatterns m_excludePatterns;
-  TaskId m_currentTaskId;
-  QHash<QString, QTreeWidgetItem*> m_fileToItem;
-  QFileIconProvider m_fileIconProvider;
+    class Ui_LogWidget *m_ui;
 };
 
-#endif // CHARSET_TOOL_MAIN_WINDOW_H
+#endif // LOG_WIDGET_H

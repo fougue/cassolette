@@ -17,7 +17,8 @@ HEADERS += \
     src/select_charset_dialog.h \
     src/charset_encoder.h \
     src/base_file_task.h \
-    src/progress_dialog.h
+    src/progress_dialog.h \
+    src/log_widget.h
 
 SOURCES += \
     src/main.cpp \
@@ -28,13 +29,15 @@ SOURCES += \
     src/select_charset_dialog.cpp \
     src/charset_encoder.cpp \
     src/base_file_task.cpp \
-    src/progress_dialog.cpp
+    src/progress_dialog.cpp \
+    src/log_widget.cpp
 
 FORMS += \
     src/charset_tool_main_window.ui \
     src/input_filter_dialog.ui \
     src/select_charset_dialog.ui \
-    src/progress_dialog.ui
+    src/progress_dialog.ui \
+    src/log_widget.ui
 
 RESOURCES += charset-tool.qrc
 

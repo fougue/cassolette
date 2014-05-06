@@ -39,9 +39,7 @@
 
 #include <QtCore/QtDebug>
 #include <QtCore/QFileInfo>
-#include <QtCore/QTime>
 #include <QtWidgets/QFileDialog>
-#include <QtWidgets/QScrollBar>
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QThread>
@@ -54,23 +52,6 @@
 
 #include "progress_dialog.h"
 //#include <QtWidgets/QProgressDialog>
-
-namespace internal {
-
-static QColor mixColors(const QColor& a, const QColor& b)
-{
-  return QColor((a.red()   + 2 * b.red())   / 3,
-                (a.green() + 2 * b.green()) / 3,
-                (a.blue()  + 2 * b.blue())  / 3,
-                (a.alpha() + 2 * b.alpha()) / 3);
-}
-
-static QString currentTimeLogText()
-{
-  return QTime::currentTime().toString(Qt::DefaultLocaleShortDate);
-}
-
-} // namespace internal
 
 CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
   : QMainWindow(parent),
@@ -168,7 +149,7 @@ void CharsetToolMainWindow::runAnalyse()
                                                        m_filterPatterns.appliablePatterns(),
                                                        m_excludePatterns.appliablePatterns());
   foreach (const QString& err, listFilesRes.errors)
-    this->appendLogError(err);
+    m_ui->pageLog->appendLogError(err);
 
   if (!listFilesRes.files.isEmpty()) {
     // Notify user about new task
@@ -236,7 +217,7 @@ void CharsetToolMainWindow::onEncodingBatch(const BaseFileTask::ResultBatch &bat
     this->handleAbortTask();
     if (!result.hasError()) {
       const QString charset = result.payload.toString();
-      this->appendLogInfo(tr("Converted %1 to %2").arg(result.filePath).arg(charset));
+      m_ui->pageLog->appendLogInfo(tr("Converted %1 to %2").arg(result.filePath).arg(charset));
       // Update detected charset
       QTreeWidgetItem* item = m_fileToItem.value(result.filePath);
       if (item != NULL)
@@ -257,12 +238,12 @@ void CharsetToolMainWindow::onTaskStarted()
 
 void CharsetToolMainWindow::handleTaskError(const QString &inputFile, const QString &errorText)
 {
-  this->appendLogError(QString("%1 : %2").arg(inputFile, errorText));
+  m_ui->pageLog->appendLogError(QString("%1 : %2").arg(inputFile, errorText));
 }
 
 void CharsetToolMainWindow::onTaskAborted()
 {
-  this->appendLogInfo(tr("%1 aborted").arg(this->currentTaskName()));
+  m_ui->pageLog->appendLogInfo(tr("%1 aborted").arg(this->currentTaskName()));
   this->onTaskEnded();
 }
 
@@ -271,7 +252,7 @@ void CharsetToolMainWindow::onTaskFinished()
   // taskFinished() is emitted after taskAborted(), so we check if there is any task running to
   //   avoid displaying any superfluous "<Task> ended" log message
   if (m_currentTaskId != CharsetToolMainWindow::NoTask)
-    this->appendLogInfo(tr("%1 finished").arg(this->currentTaskName()));
+    m_ui->pageLog->appendLogInfo(tr("%1 finished").arg(this->currentTaskName()));
   this->onTaskEnded();
 }
 
@@ -343,72 +324,10 @@ void CharsetToolMainWindow::createTaskProgressDialog(const QString &labelText, i
 
   m_taskProgressDialog->show();
 
-  this->appendLogInfo(labelText);
+  m_ui->pageLog->appendLogInfo(labelText);
 }
 
 void CharsetToolMainWindow::incrementTaskProgress(int amount)
 {
   m_taskProgressDialog->setValue(m_taskProgressDialog->value() + amount);
-}
-
-void CharsetToolMainWindow::clearLog()
-{
-  m_ui->logTextEdit->clear();
-}
-
-void CharsetToolMainWindow::appendLogInfo(const QString &msg)
-{
-  this->appendLog(msg, CharsetToolMainWindow::InfoLog);
-}
-
-void CharsetToolMainWindow::appendLogWarning(const QString &msg)
-{
-  this->appendLog(msg, CharsetToolMainWindow::WarningLog);
-}
-
-void CharsetToolMainWindow::appendLogError(const QString &msg)
-{
-  this->appendLog(msg, CharsetToolMainWindow::ErrorLog);
-}
-
-void CharsetToolMainWindow::appendLog(const QString &msg, LogFormat format)
-{
-  // Code taken from QtCreator src/plugins/coreplugin/outputwindow.cpp
-
-  const QPalette pal = m_ui->logTextEdit->palette();
-  QTextCharFormat textFormat;
-
-  switch (format) {
-  case CharsetToolMainWindow::InfoLog:
-    textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::blue)));
-    textFormat.setFontWeight(QFont::Normal);
-    break;
-  case CharsetToolMainWindow::WarningLog:
-    textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text),
-                                                 QColor(255, 165 ,0))); // Orange
-    textFormat.setFontWeight(QFont::Bold);
-    break;
-  case CharsetToolMainWindow::ErrorLog:
-    textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::red)));
-    textFormat.setFontWeight(QFont::Bold);
-    break;
-  }
-
-  QScrollBar* logTextEditVertScrollBar = m_ui->logTextEdit->verticalScrollBar();
-  const bool atBottom = logTextEditVertScrollBar->value() == logTextEditVertScrollBar->maximum();
-  QTextCursor cursor = QTextCursor(m_ui->logTextEdit->document());
-  cursor.movePosition(QTextCursor::End);
-  cursor.beginEditBlock();
-  //: %1 current time of log message    %2 log message
-  cursor.insertText(tr("%1: %2").arg(internal::currentTimeLogText(), msg) + QLatin1Char('\n'),
-                    textFormat);
-  cursor.endEditBlock();
-
-  if (atBottom) {
-    logTextEditVertScrollBar->setValue(logTextEditVertScrollBar->maximum());
-    // QPlainTextEdit destroys the first calls value in case of multiline
-    // text, so make sure that the scroll bar actually gets the value set.
-    // Is a noop if the first call succeeded.
-    logTextEditVertScrollBar->setValue(logTextEditVertScrollBar->maximum());
-  }
 }

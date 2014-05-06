@@ -284,34 +284,10 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="pageLog">
+         <widget class="LogWidget" name="pageLog">
           <attribute name="title">
            <string>Log</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QPlainTextEdit" name="logTextEdit">
-             <property name="undoRedoEnabled">
-              <bool>false</bool>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </widget>
         </widget>
        </item>
@@ -326,7 +302,7 @@
      <x>0</x>
      <y>0</y>
      <width>775</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -336,6 +312,12 @@
    <class>EditableListWidget</class>
    <extends>QListWidget</extends>
    <header>editable_list_widget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LogWidget</class>
+   <extends>QWidget</extends>
+   <header>log_widget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
