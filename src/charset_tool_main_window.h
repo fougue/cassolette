@@ -54,7 +54,7 @@ class CharsetToolMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    CharsetToolMainWindow(QWidget *parent = NULL);
+    CharsetToolMainWindow(QWidget *parent = nullptr);
     ~CharsetToolMainWindow();
 
 private slots:

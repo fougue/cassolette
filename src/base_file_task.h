@@ -57,7 +57,7 @@ public:
     };
     typedef QVector<BaseFileTask::ResultItem> ResultBatch;
 
-    BaseFileTask(QObject* parent = NULL);
+    BaseFileTask(QObject* parent = nullptr);
     ~BaseFileTask();
 
     Q_SLOT virtual void abortTask();

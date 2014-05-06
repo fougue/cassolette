@@ -44,7 +44,7 @@
 
 CharsetEncoder::CharsetEncoder(QObject *parent)
     : BaseFileTask(parent),
-      m_dstCodec(NULL)
+      m_dstCodec(nullptr)
 {
     this->createFutureWatcher();
 }
@@ -55,7 +55,7 @@ void CharsetEncoder::asyncEncode(const QByteArray& charset,
     emit taskStarted();
 
     m_dstCodec = QTextCodec::codecForName(charset);
-    if (m_dstCodec != NULL) {
+    if (m_dstCodec != nullptr) {
         foreach (const CharsetEncoder::InputFile& inputFile, fileVec) {
             const QByteArray& inputCharset = inputFile.charset;
             if (!m_codecCache.contains(inputCharset))
@@ -81,7 +81,7 @@ BaseFileTask::ResultItem CharsetEncoder::encodeFile(const CharsetEncoder::InputF
 
     const QString inputFilePath = inputFile.filePath;
     QTextCodec *srcCodec = m_codecCache.value(inputFile.charset);
-    if (srcCodec != NULL) {
+    if (srcCodec != nullptr) {
         QFile file(inputFilePath);
         if (file.open(QIODevice::ReadOnly)) {
             const QString fileUnicodeContents = srcCodec->toUnicode(file.readAll());

@@ -46,7 +46,7 @@ class SelectCharsetDialog : public QDialog
     Q_OBJECT
 
 public:
-    SelectCharsetDialog(QWidget *parent = NULL);
+    SelectCharsetDialog(QWidget *parent = nullptr);
     ~SelectCharsetDialog();
 
     QByteArray selectedCharset() const;

@@ -72,7 +72,7 @@ SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
                                                        QLatin1String("UTF-8")).toString();
 
     QStandardItemModel* codecModel = new QStandardItemModel(m_filterCodecModel);
-    QStandardItem* codecItemToSelect = NULL;
+    QStandardItem* codecItemToSelect = nullptr;
 
     // Build sorted map of charset names
     foreach (const QByteArray& codecName, QTextCodec::availableCodecs()) {
@@ -100,7 +100,7 @@ SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
     m_filterCodecModel->setSourceModel(codecModel);
     m_filterCodecModel->sort(0, Qt::AscendingOrder);
     m_ui->charsetListView->setModel(m_filterCodecModel);
-    if (codecItemToSelect != NULL) {
+    if (codecItemToSelect != nullptr) {
         m_ui->charsetListView->selectionModel()->select(codecItemToSelect->index(),
                                                         QItemSelectionModel::ClearAndSelect);
     }

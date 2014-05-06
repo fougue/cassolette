@@ -42,7 +42,7 @@
 
 BaseFileTask::BaseFileTask(QObject *parent)
     : QObject(parent),
-      m_futureWatcher(NULL),
+      m_futureWatcher(nullptr),
       m_batchSize(0)
 {
     this->setBatchSize(256);
@@ -54,7 +54,7 @@ BaseFileTask::~BaseFileTask()
 
 void BaseFileTask::abortTask()
 {
-    if (m_futureWatcher != NULL && !m_futureWatcher->isCanceled()) {
+    if (m_futureWatcher != nullptr && !m_futureWatcher->isCanceled()) {
         m_futureWatcher->cancel();
         m_futureWatcher->waitForFinished();
     }
@@ -98,7 +98,7 @@ void BaseFileTask::onFutureWatcherCanceled()
 
 void BaseFileTask::createFutureWatcher()
 {
-    if (m_futureWatcher == NULL) {
+    if (m_futureWatcher == nullptr) {
         m_futureWatcher = new QFutureWatcher<ResultItem>(this);
         QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureWatcherFinished()));
         QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SLOT(onFutureWatcherCanceled()));

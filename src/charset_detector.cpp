@@ -75,7 +75,7 @@ private:
 
 TextFileFormatDetector::TextFileFormatDetector(PRUint32 langFilter)
     : nsUniversalDetector(langFilter),
-      m_detectedEncodingName(NULL)
+      m_detectedEncodingName(nullptr)
 {
 }
 
@@ -97,7 +97,7 @@ void TextFileFormatDetector::Report(const char *charset)
 void TextFileFormatDetector::Reset()
 {
     nsUniversalDetector::Reset();
-    m_detectedEncodingName = NULL;
+    m_detectedEncodingName = nullptr;
 }
 
 static bool acceptInputFile(const QString& file,
@@ -209,7 +209,7 @@ BaseFileTask::ResultItem CharsetDetector::detectFile(const QString &filePath)
             const nsresult handleRes = formatDetector->HandleData(fileContents.constData(),
                                                                   fileContents.size());
             formatDetector->DataEnd();
-            if (handleRes == NS_OK && formatDetector->detectedEncodingName() != NULL)
+            if (handleRes == NS_OK && formatDetector->detectedEncodingName() != nullptr)
                 result.payload = formatDetector->detectedEncodingName();
         }
         else {

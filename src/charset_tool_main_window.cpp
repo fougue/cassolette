@@ -56,7 +56,7 @@
 CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
     : QMainWindow(parent),
       m_ui(new Ui_CharsetToolMainWindow),
-      m_taskProgressDialog(NULL),
+      m_taskProgressDialog(nullptr),
       m_csDetector(new CharsetDetector(this)),
       m_csEncoder(new CharsetEncoder(this)),
       m_currentTaskId(CharsetToolMainWindow::NoTask)
@@ -182,7 +182,7 @@ void CharsetToolMainWindow::runConversion()
 
         // Notify user about new task
         this->createTaskProgressDialog(tr("Converting %n file(s) to %1 ...",
-                                          NULL,
+                                          nullptr,
                                           inputFileVec.size()).arg(charsetStr),
                                        inputFileVec.size());
 
@@ -220,7 +220,7 @@ void CharsetToolMainWindow::onEncodingBatch(const BaseFileTask::ResultBatch &bat
             m_ui->pageLog->appendLogInfo(tr("Converted %1 to %2").arg(result.filePath).arg(charset));
             // Update detected charset
             QTreeWidgetItem* item = m_fileToItem.value(result.filePath);
-            if (item != NULL)
+            if (item != nullptr)
                 item->setText(0, charset);
         }
         else {
@@ -275,10 +275,10 @@ void CharsetToolMainWindow::connectTask(const BaseFileTask *task)
 BaseFileTask *CharsetToolMainWindow::currentTask() const
 {
     switch (m_currentTaskId) {
-    case CharsetToolMainWindow::NoTask: return NULL;
+    case CharsetToolMainWindow::NoTask: return nullptr;
     case CharsetToolMainWindow::AnalyseTask: return m_csDetector;
     case CharsetToolMainWindow::ConversionTask: return m_csEncoder;
-    default: return NULL;
+    default: return nullptr;
     }
 }
 

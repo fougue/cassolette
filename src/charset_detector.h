@@ -54,7 +54,7 @@ class CharsetDetector : public BaseFileTask
     Q_OBJECT
 
 public:
-    CharsetDetector(QObject* parent = NULL);
+    CharsetDetector(QObject* parent = nullptr);
 
     void asyncDetect(const QStringList& filePathList);
 

@@ -45,7 +45,7 @@ class EditableListWidget : public QListWidget
     Q_OBJECT
 
 public:
-    EditableListWidget(QWidget* parent = NULL);
+    EditableListWidget(QWidget* parent = nullptr);
 
 private slots:
     void onItemButtonClicked(int btnId, const QModelIndex& index);

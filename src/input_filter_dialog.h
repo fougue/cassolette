@@ -56,7 +56,7 @@ class InputFilterDialog : public QDialog
 public:
     typedef InputFilterDialog_FilePatterns FilePatterns;
 
-    InputFilterDialog(QWidget *parent = NULL);
+    InputFilterDialog(QWidget *parent = nullptr);
     ~InputFilterDialog();
 
     void installFilterPatterns(const FilePatterns& fp);

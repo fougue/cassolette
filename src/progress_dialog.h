@@ -52,7 +52,7 @@ class ProgressDialog : public QDialog
     Q_OBJECT
 
 public:
-    ProgressDialog(QWidget *parent = NULL);
+    ProgressDialog(QWidget *parent = nullptr);
     ~ProgressDialog();
 
     QString labelText() const;

@@ -59,7 +59,7 @@ public:
         QByteArray charset;
     };
 
-    CharsetEncoder(QObject *parent = NULL);
+    CharsetEncoder(QObject *parent = nullptr);
 
     void asyncEncode(const QByteArray& charset, const QVector<InputFile>& fileVec);
 
