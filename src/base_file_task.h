@@ -47,33 +47,51 @@ class BaseFileTask : public QObject
     Q_OBJECT
 
 public:
+    typedef void InputType;
+
     struct ResultItem
     {
         QString  filePath;
         QVariant payload;
         QString  errorText;
         bool hasError() const;
+
+        static ResultItem createPayload(const QString& pFilePath);
+        static ResultItem createPayload(const QString& pFilePath, const QVariant& pPayload);
+        static ResultItem createError(const QString& pFilePath, const QString& pErrorText);
     };
 
     BaseFileTask(QObject* parent = nullptr);
     ~BaseFileTask();
 
+    int inputSize() const;
+
+    Q_SLOT virtual void asyncExec();
     Q_SLOT virtual void abortTask();
+    virtual bool isRunning() const;
 
 signals:
     void taskStarted();
+
     void taskResultItem(const BaseFileTask::ResultItem& item);
+    void taskProgressRangeChanged(int min, int max);
+    void taskProgressValueChanged(int value);
+
     void taskFinished();
     void taskAborted();
 
 protected:
+    typedef QFutureWatcher<BaseFileTask::ResultItem> FutureWatcher;
     void createFutureWatcher();
     QFutureWatcher<BaseFileTask::ResultItem> *futureWatcher() const;
 
     Q_SLOT virtual void onTaskResultReadyAt(int resultId);
 
+    void setInputSize(int size);
+
 private:
     QFutureWatcher<BaseFileTask::ResultItem>* m_futureWatcher;
+    int m_inputSize;
 };
 
 #endif // BASE_FILE_TASK_H

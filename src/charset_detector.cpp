@@ -130,65 +130,18 @@ CharsetDetector::CharsetDetector(QObject *parent)
     this->createFutureWatcher();
 }
 
-void CharsetDetector::asyncDetect(const QStringList &filePathList)
+void CharsetDetector::setInput(const QStringList &filePathList)
 {
-    emit taskStarted();
-
-    foreach (const QString& filePath, filePathList) {
-        const QFileInfo fileInfo(filePath);
-        BaseFileTask::ResultItem detRes;
-        detRes.filePath = fileInfo.absoluteFilePath();
-        if (!fileInfo.isFile())
-            detRes.errorText = tr("Not a file");
-    }
-
-    auto future = QtConcurrent::mapped(filePathList, std::bind(&CharsetDetector::detectFile,
-                                                               this,
-                                                               std::placeholders::_1));
-    this->futureWatcher()->setFuture(future);
+    m_filePathList = filePathList;
+    this->setInputSize(filePathList.size());
 }
 
-CharsetDetector::ListFilesResult CharsetDetector::listFiles(const QStringList &inputs,
-                                                            const QStringList &filters,
-                                                            const QStringList &excludes)
+void CharsetDetector::asyncExec()
 {
-    QVector<QRegExp> filterRxVec;
-    QVector<QRegExp> excludeRxVec;
-
-    foreach (const QString& filter, filters)
-        filterRxVec.append(QRegExp(filter, Qt::CaseSensitive, QRegExp::Wildcard));
-    foreach (const QString& exclude, excludes)
-        excludeRxVec.append(QRegExp(exclude, Qt::CaseSensitive, QRegExp::Wildcard));
-
-    CharsetDetector::ListFilesResult result;
-
-    foreach (const QString& input, inputs) {
-        const QFileInfo inputInfo(input);
-        if (inputInfo.isFile()
-                && internal::acceptInputFile(inputInfo.absoluteFilePath(), filterRxVec, excludeRxVec))
-        {
-            result.files += inputInfo.absoluteFilePath();
-        }
-        else if (inputInfo.isDir()) {
-            if (inputInfo.exists()) {
-                QDirIterator dirIt(inputInfo.absoluteFilePath(), QDirIterator::Subdirectories);
-                while (dirIt.hasNext()) {
-                    dirIt.next();
-                    const QFileInfo fileInfo = dirIt.fileInfo();
-                    if (fileInfo.isFile()
-                            && internal::acceptInputFile(fileInfo.absoluteFilePath(), filterRxVec, excludeRxVec))
-                    {
-                        result.files += fileInfo.absoluteFilePath();
-                    }
-                }
-            }
-            else {
-                result.errors += tr("Folder '%1' does not exist").arg(inputInfo.absoluteFilePath());
-            }
-        }
-    } // end foreach
-
-    return result;
+    auto future = QtConcurrent::mapped(m_filePathList, std::bind(&CharsetDetector::detectFile,
+                                                                 this,
+                                                                 std::placeholders::_1));
+    this->futureWatcher()->setFuture(future);
 }
 
 BaseFileTask::ResultItem CharsetDetector::detectFile(const QString &filePath)

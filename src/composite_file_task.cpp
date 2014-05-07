@@ -35,47 +35,14 @@
 **
 ****************************************************************************/
 
-#ifndef CHARSET_ENCODER_H
-#define CHARSET_ENCODER_H
+#include "composite_file_task.h"
 
-#include "base_file_task.h"
-#include <QtCore/QHash>
-#include <QtCore/QVector>
-class QTextCodec;
-
-/*! \brief Provides encoding of files to a target character set
- *
- *  BaseFileTask::ResultItem::payload contains the target character set
- */
-class CharsetEncoder : public BaseFileTask
+void CompositeFileTaskBridge_QStringList::reset()
 {
-    Q_OBJECT
+    this->secondTaskInputPtr()->clear();
+}
 
-public:
-    struct InputFile
-    {
-        InputFile();
-        InputFile(const QString& pFilePath, const QByteArray& pCharset);
-        QString filePath;
-        QByteArray charset;
-    };
-    typedef QVector<InputFile> InputType;
-
-    CharsetEncoder(QObject *parent = nullptr);
-
-    QByteArray targetCharset() const;
-    void setTargetCharset(const QByteArray& charset);
-
-    void setInput(const QVector<InputFile>& fileVec);
-
-    void asyncExec();
-
-private:
-    BaseFileTask::ResultItem encodeFile(const InputFile& inputFile);
-
-    QVector<InputFile> m_inputFileVec;
-    QHash<QByteArray, QTextCodec*> m_codecCache;
-    QTextCodec* m_targetCodec;
-};
-
-#endif // CHARSET_ENCODER_H
+void CompositeFileTaskBridge_QStringList::onFirstTaskResultItem(const BaseFileTask::ResultItem &resultItem)
+{
+    this->secondTaskInputPtr()->append(resultItem.payload.toString());
+}

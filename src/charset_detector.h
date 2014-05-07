@@ -54,23 +54,17 @@ class CharsetDetector : public BaseFileTask
     Q_OBJECT
 
 public:
+    typedef QStringList InputType;
+
     CharsetDetector(QObject* parent = nullptr);
 
-    void asyncDetect(const QStringList& filePathList);
-
-    struct ListFilesResult
-    {
-        QStringList files;
-        QStringList errors;
-    };
-
-    static ListFilesResult listFiles(const QStringList& inputs, // Files and folders
-                                     const QStringList& filters = QStringList(),
-                                     const QStringList& excludes = QStringList());
+    void setInput(const QStringList& filePathList);
+    void asyncExec();
 
 private:
     BaseFileTask::ResultItem detectFile(const QString& filePath);
 
+    QStringList m_filePathList;
     QThreadStorage<internal::TextFileFormatDetector*> m_detectorByThread;
 };
 

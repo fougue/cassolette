@@ -18,7 +18,9 @@ HEADERS += \
     src/charset_encoder.h \
     src/base_file_task.h \
     src/progress_dialog.h \
-    src/log_widget.h
+    src/log_widget.h \
+    src/dir_iterator.h \
+    src/composite_file_task.h
 
 SOURCES += \
     src/main.cpp \
@@ -30,7 +32,9 @@ SOURCES += \
     src/charset_encoder.cpp \
     src/base_file_task.cpp \
     src/progress_dialog.cpp \
-    src/log_widget.cpp
+    src/log_widget.cpp \
+    src/dir_iterator.cpp \
+    src/composite_file_task.cpp
 
 FORMS += \
     src/charset_tool_main_window.ui \

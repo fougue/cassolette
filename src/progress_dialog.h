@@ -43,9 +43,9 @@ class QAbstractButton;
 
 /*! \brief Similar to QProgressDialog
  *
- * It is lighter than QProgressDialog that comes with an internal QTimer, app processing, ...
- * But the main reason QProgressDialog is not used are the frequent crashs with Windows, even
- * with recent Qt.
+ *  It is lighter than QProgressDialog that comes with an internal QTimer, app processing, ...
+ *  But the main reason QProgressDialog is not used are the frequent crashs with Windows, even
+ *  with recent Qt.
  */
 class ProgressDialog : public QDialog
 {
@@ -56,7 +56,7 @@ public:
     ~ProgressDialog();
 
     QString labelText() const;
-    void setLabelText(const QString& text);
+    Q_SLOT void setLabelText(const QString& text);
 
     int minimumValue() const;
     int maximumValue() const;

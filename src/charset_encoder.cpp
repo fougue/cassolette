@@ -44,27 +44,40 @@
 
 CharsetEncoder::CharsetEncoder(QObject *parent)
     : BaseFileTask(parent),
-      m_dstCodec(nullptr)
+      m_targetCodec(nullptr)
 {
     this->createFutureWatcher();
 }
 
-void CharsetEncoder::asyncEncode(const QByteArray& charset,
-                                 const QVector<CharsetEncoder::InputFile> &fileVec)
+QByteArray CharsetEncoder::targetCharset() const
 {
-    emit taskStarted();
+    return m_targetCodec != nullptr ? m_targetCodec->name() :
+                                      QByteArray();
+}
 
-    m_dstCodec = QTextCodec::codecForName(charset);
-    if (m_dstCodec != nullptr) {
-        foreach (const CharsetEncoder::InputFile& inputFile, fileVec) {
+void CharsetEncoder::setTargetCharset(const QByteArray &charset)
+{
+    m_targetCodec = QTextCodec::codecForName(charset);
+}
+
+void CharsetEncoder::setInput(const QVector<CharsetEncoder::InputFile> &fileVec)
+{
+    m_inputFileVec = fileVec;
+    this->setInputSize(fileVec.size());
+}
+
+void CharsetEncoder::asyncExec()
+{
+    if (m_targetCodec != nullptr) {
+        foreach (const CharsetEncoder::InputFile& inputFile, m_inputFileVec) {
             const QByteArray& inputCharset = inputFile.charset;
             if (!m_codecCache.contains(inputCharset))
                 m_codecCache.insert(inputCharset, QTextCodec::codecForName(inputCharset));
         }
 
-        auto future = QtConcurrent::mapped(fileVec, std::bind(&CharsetEncoder::encodeFile,
-                                                              this,
-                                                              std::placeholders::_1));
+        auto future = QtConcurrent::mapped(m_inputFileVec, std::bind(&CharsetEncoder::encodeFile,
+                                                                     this,
+                                                                     std::placeholders::_1));
         this->futureWatcher()->setFuture(future);
     }
     else {
@@ -77,7 +90,7 @@ BaseFileTask::ResultItem CharsetEncoder::encodeFile(const CharsetEncoder::InputF
 {
     BaseFileTask::ResultItem result;
     result.filePath = inputFile.filePath;
-    result.payload = m_dstCodec->name();
+    result.payload = m_targetCodec->name();
 
     const QString inputFilePath = inputFile.filePath;
     QTextCodec *srcCodec = m_codecCache.value(inputFile.charset);
@@ -89,7 +102,7 @@ BaseFileTask::ResultItem CharsetEncoder::encodeFile(const CharsetEncoder::InputF
 
             bool writeSuccess = false;
             if (file.open(QIODevice::WriteOnly)) {
-                const QByteArray encodedContents = m_dstCodec->fromUnicode(fileUnicodeContents);
+                const QByteArray encodedContents = m_targetCodec->fromUnicode(fileUnicodeContents);
                 if (file.write(encodedContents) != -1)
                     writeSuccess = true;
             }

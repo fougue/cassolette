@@ -126,5 +126,6 @@ void ProgressDialog::onClicked(QAbstractButton *btn)
     if (btn == m_ui->buttonBox->button(QDialogButtonBox::Abort)) {
         m_ui->stackedWidget->setCurrentWidget(m_ui->abortPage);
         m_wasCanceled = true;
+        emit canceled();
     }
 }

@@ -35,47 +35,60 @@
 **
 ****************************************************************************/
 
-#ifndef CHARSET_ENCODER_H
-#define CHARSET_ENCODER_H
+#ifndef DIR_ITERATOR_H
+#define DIR_ITERATOR_H
 
 #include "base_file_task.h"
-#include <QtCore/QHash>
-#include <QtCore/QVector>
-class QTextCodec;
 
-/*! \brief Provides encoding of files to a target character set
+#include <QtCore/QVector>
+#include <QtCore/QRegExp>
+class QEventLoop;
+class QFileInfo;
+
+/*! \brief Provides recursive(directory) file iteration
  *
- *  BaseFileTask::ResultItem::payload contains the target character set
+ *  BaseFileTask::ResultItem::filePath and payload contains the same value
+ *
+ *  \note DirIterator does not set BaseFileTask::inputSize() so task progress cannot be computed
  */
-class CharsetEncoder : public BaseFileTask
+class DirIterator : public BaseFileTask
 {
     Q_OBJECT
 
 public:
-    struct InputFile
-    {
-        InputFile();
-        InputFile(const QString& pFilePath, const QByteArray& pCharset);
-        QString filePath;
-        QByteArray charset;
-    };
-    typedef QVector<InputFile> InputType;
+    typedef QStringList InputType;
 
-    CharsetEncoder(QObject *parent = nullptr);
+    DirIterator(QObject* parent = nullptr);
 
-    QByteArray targetCharset() const;
-    void setTargetCharset(const QByteArray& charset);
-
-    void setInput(const QVector<InputFile>& fileVec);
+    void setFilters(const QStringList& filters);
+    void setExcludes(const QStringList& excludes);
+    void setInput(const QStringList& fileOrFolderList);
 
     void asyncExec();
+    bool isRunning() const;
+
+    void abortTask();
+
+private slots:
+    void setAbortFlagOn();
 
 private:
-    BaseFileTask::ResultItem encodeFile(const InputFile& inputFile);
+    void quitWaitingAbortEventLoop();
 
-    QVector<InputFile> m_inputFileVec;
-    QHash<QByteArray, QTextCodec*> m_codecCache;
-    QTextCodec* m_targetCodec;
+    void iterate();
+    bool acceptsInputFile(const QString& file) const;
+
+    QFutureWatcher<void>* m_futureWatcher;
+    bool m_abortFlag;
+    QEventLoop* m_abortEventLoop;
+
+    QStringList m_filters;
+    QVector<QRegExp> m_filterRxVec;
+
+    QStringList m_excludes;
+    QVector<QRegExp> m_excludeRxVec;
+
+    QStringList m_fileOrFolderList;
 };
 
-#endif // CHARSET_ENCODER_H
+#endif // DIR_ITERATOR_H

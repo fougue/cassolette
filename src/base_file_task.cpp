@@ -42,20 +42,41 @@
 
 BaseFileTask::BaseFileTask(QObject *parent)
     : QObject(parent),
-      m_futureWatcher(nullptr)
+      m_futureWatcher(nullptr),
+      m_inputSize(0)
 {
+    qRegisterMetaType<BaseFileTask::ResultItem>("BaseFileTask::ResultItem");
 }
 
 BaseFileTask::~BaseFileTask()
 {
 }
 
+int BaseFileTask::inputSize() const
+{
+    return m_inputSize;
+}
+
+//! \brief Does nothing by default
+void BaseFileTask::asyncExec()
+{
+}
+
 void BaseFileTask::abortTask()
 {
-    if (m_futureWatcher != nullptr && !m_futureWatcher->isCanceled()) {
+    if (m_futureWatcher != nullptr
+            && m_futureWatcher->isRunning()
+            && !m_futureWatcher->isCanceled())
+    {
         m_futureWatcher->cancel();
         m_futureWatcher->waitForFinished();
     }
+}
+
+bool BaseFileTask::isRunning() const
+{
+    return m_futureWatcher != nullptr ? m_futureWatcher->isRunning() :
+                                        false;
 }
 
 void BaseFileTask::onTaskResultReadyAt(int resultId)
@@ -64,14 +85,25 @@ void BaseFileTask::onTaskResultReadyAt(int resultId)
     emit taskResultItem(res);
 }
 
+void BaseFileTask::setInputSize(int size)
+{
+    m_inputSize = size;
+}
+
 void BaseFileTask::createFutureWatcher()
 {
     if (m_futureWatcher == nullptr) {
         m_futureWatcher = new QFutureWatcher<ResultItem>(this);
+        QObject::connect(m_futureWatcher, SIGNAL(started()), this, SIGNAL(taskStarted()));
         QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SIGNAL(taskFinished()));
         QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SIGNAL(taskAborted()));
         QObject::connect(m_futureWatcher, SIGNAL(resultReadyAt(int)),
                          this, SLOT(onTaskResultReadyAt(int)));
+
+        QObject::connect(m_futureWatcher, &FutureWatcher::progressRangeChanged,
+                         this, &BaseFileTask::taskProgressRangeChanged);
+        QObject::connect(m_futureWatcher, &FutureWatcher::progressValueChanged,
+                         this, &BaseFileTask::taskProgressValueChanged);
     }
 }
 
@@ -84,4 +116,30 @@ QFutureWatcher<BaseFileTask::ResultItem> *BaseFileTask::futureWatcher() const
 bool BaseFileTask::ResultItem::hasError() const
 {
     return !errorText.isEmpty();
+}
+
+BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(const QString &pFilePath)
+{
+    BaseFileTask::ResultItem item;
+    item.filePath = pFilePath;
+    item.payload = pFilePath;
+    return item;
+}
+
+BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(const QString &pFilePath,
+                                                                 const QVariant &pPayload)
+{
+    BaseFileTask::ResultItem item;
+    item.filePath = pFilePath;
+    item.payload = pPayload;
+    return item;
+}
+
+BaseFileTask::ResultItem BaseFileTask::ResultItem::createError(const QString &pFilePath,
+                                                               const QString &pErrorText)
+{
+    BaseFileTask::ResultItem item;
+    item.filePath = pFilePath;
+    item.errorText = pErrorText;
+    return item;
 }

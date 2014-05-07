@@ -41,12 +41,13 @@
 #include "editable_list_widget.h"
 #include "input_filter_dialog.h"
 #include "base_file_task.h"
+class CharsetDetector;
+class CharsetEncoder;
+class DirIterator;
 class ProgressDialog;
 
 #include <QtWidgets/QFileIconProvider>
 #include <QtWidgets/QMainWindow>
-class CharsetDetector;
-class CharsetEncoder;
 class QTreeWidgetItem;
 
 class CharsetToolMainWindow : public QMainWindow
@@ -66,11 +67,17 @@ private slots:
     void runConversion();
 
     void onTaskResultItem(const BaseFileTask::ResultItem& resultItem);
-    void onTaskStarted();
+    void onFileListingStarted();
+    void onDetectionStarted();
+    void onConversionStarted();
     void onTaskAborted();
     void onTaskFinished();
+    void onProgressDialogCanceled();
 
 private:
+    void handleAnalyseResultItem(const BaseFileTask::ResultItem& resultItem);
+    void handleConversionResultItem(const BaseFileTask::ResultItem& resultItem);
+
     enum TaskId
     {
         NoTask,
@@ -84,27 +91,6 @@ private:
     QString currentTaskName() const;
     void setCurrentTask(TaskId taskId);
     void handleTaskError(const QString& inputFile, const QString& errorText);
-    void handleAbortTask();
-
-    class AbstractTaskHelper
-    {
-    public:
-        AbstractTaskHelper(CharsetToolMainWindow* backPtr)
-            : m_backPtr(backPtr)
-        { }
-
-        virtual ~AbstractTaskHelper() {}
-
-        virtual void reset() { }
-        virtual void handleResultItem(const BaseFileTask::ResultItem& resultItem) = 0;
-        virtual void handleTaskFinished() { }
-
-        CharsetToolMainWindow* m_backPtr;
-    };
-    class AnalyseTaskHelper;
-    class ConversionTaskHelper;
-    friend class AnalyseTaskHelper;
-    friend class ConversionTaskHelper;
 
     void updateTaskButtons();
     void createTaskProgressDialog(const QString& labelText, int fileCount);
@@ -114,15 +100,20 @@ private:
     class Ui_CharsetToolMainWindow *m_ui;
     QString m_lastInputDir;
     ProgressDialog* m_taskProgressDialog;
+
     CharsetDetector* m_csDetector;
     CharsetEncoder* m_csEncoder;
+    DirIterator* m_dirIterator;
+    BaseFileTask* m_listAndAnalyseTask;
+
     InputFilterDialog::FilePatterns m_filterPatterns;
     InputFilterDialog::FilePatterns m_excludePatterns;
     TaskId m_currentTaskId;
     QHash<QString, QTreeWidgetItem*> m_fileToItem;
     QFileIconProvider m_fileIconProvider;
 
-    QHash<TaskId, AbstractTaskHelper*> m_taskIdToTaskHelper;
+    static const int fileItemBatchSize = 128;
+    QList<QTreeWidgetItem*> m_fileItemBatch;
 };
 
 #endif // CHARSET_TOOL_MAIN_WINDOW_H
