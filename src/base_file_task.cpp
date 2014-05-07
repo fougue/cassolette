@@ -43,7 +43,8 @@
 BaseFileTask::BaseFileTask(QObject *parent)
     : QObject(parent),
       m_futureWatcher(nullptr),
-      m_inputSize(0)
+      m_inputSize(0),
+      m_abortRequested(false)
 {
     qRegisterMetaType<BaseFileTask::ResultItem>("BaseFileTask::ResultItem");
 }
@@ -64,12 +65,15 @@ void BaseFileTask::asyncExec()
 
 void BaseFileTask::abortTask()
 {
-    if (m_futureWatcher != nullptr
-            && m_futureWatcher->isRunning()
-            && !m_futureWatcher->isCanceled())
-    {
-        m_futureWatcher->cancel();
-        m_futureWatcher->waitForFinished();
+    if (this->isRunning() && !m_abortRequested) {
+        m_abortRequested = true;
+
+        if (m_futureWatcher != nullptr
+                && m_futureWatcher->isRunning()
+                && !m_futureWatcher->isCanceled())
+        {
+            m_futureWatcher->cancel();
+        }
     }
 }
 
@@ -90,13 +94,32 @@ void BaseFileTask::setInputSize(int size)
     m_inputSize = size;
 }
 
+bool BaseFileTask::abortRequested() const
+{
+    return m_abortRequested;
+}
+
+void BaseFileTask::endAbortRequest()
+{
+    m_abortRequested = false;
+    emit taskAborted();
+}
+
+void BaseFileTask::onFutureFinished()
+{
+    if (!m_abortRequested)
+        emit taskFinished();
+    else
+        this->endAbortRequest();
+}
+
 void BaseFileTask::createFutureWatcher()
 {
     if (m_futureWatcher == nullptr) {
         m_futureWatcher = new QFutureWatcher<ResultItem>(this);
         QObject::connect(m_futureWatcher, SIGNAL(started()), this, SIGNAL(taskStarted()));
-        QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SIGNAL(taskFinished()));
-        QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SIGNAL(taskAborted()));
+        QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureFinished()));
+        //QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SIGNAL(taskAborted()));
         QObject::connect(m_futureWatcher, SIGNAL(resultReadyAt(int)),
                          this, SLOT(onTaskResultReadyAt(int)));
 

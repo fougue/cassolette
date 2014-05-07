@@ -89,9 +89,15 @@ protected:
 
     void setInputSize(int size);
 
+    bool abortRequested() const;
+    void endAbortRequest();
+
 private:
+    Q_SLOT void onFutureFinished();
+
     QFutureWatcher<BaseFileTask::ResultItem>* m_futureWatcher;
     int m_inputSize;
+    bool m_abortRequested;
 };
 
 #endif // BASE_FILE_TASK_H

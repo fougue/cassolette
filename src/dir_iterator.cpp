@@ -42,17 +42,13 @@
 #include <QtCore/QFutureWatcher>
 #include <QtCore/QDirIterator>
 #include <QtCore/QtDebug>
-#include <QtCore/QEventLoop>
-#include <QtCore/QTimer>
 
 DirIterator::DirIterator(QObject *parent)
     : BaseFileTask(parent),
-      m_futureWatcher(new QFutureWatcher<void>(this)),
-      m_abortFlag(false),
-      m_abortEventLoop(new QEventLoop(this))
+      m_futureWatcher(new QFutureWatcher<void>(this))
 {
     QObject::connect(m_futureWatcher, SIGNAL(started()), this, SIGNAL(taskStarted()));
-    QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SIGNAL(taskFinished()));
+    QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureFinished()));
 }
 
 void DirIterator::setFilters(const QStringList &filters)
@@ -78,7 +74,6 @@ void DirIterator::setInput(const QStringList &fileOrFolderList)
 
 void DirIterator::asyncExec()
 {
-    m_abortFlag = false;
     m_futureWatcher->setFuture(QtConcurrent::run(std::bind(&DirIterator::iterate, this)));
 }
 
@@ -87,33 +82,11 @@ bool DirIterator::isRunning() const
     return m_futureWatcher->isRunning();
 }
 
-void DirIterator::abortTask()
-{
-    if (!m_abortFlag && this->isRunning()) {
-        QTimer::singleShot(10, this, SLOT(setAbortFlagOn()));
-        m_abortEventLoop->exec(QEventLoop::ExcludeUserInputEvents
-                               | QEventLoop::ExcludeSocketNotifiers);
-        emit taskAborted();
-    }
-}
-
-void DirIterator::setAbortFlagOn()
-{
-    m_abortFlag = true;
-}
-
-void DirIterator::quitWaitingAbortEventLoop()
-{
-    if (m_abortEventLoop->isRunning())
-        m_abortEventLoop->quit();
-    m_abortFlag = false;
-}
-
 void DirIterator::iterate()
 {
     foreach (const QString& input, m_fileOrFolderList) {
-        if (m_abortFlag)
-            return this->quitWaitingAbortEventLoop();
+        if (this->abortRequested())
+            return;
 
         const QFileInfo inputInfo(input);
         const QString inputAbsPath = inputInfo.absoluteFilePath();
@@ -121,8 +94,8 @@ void DirIterator::iterate()
             if (inputInfo.isDir()) {
                 QDirIterator dirIt(inputInfo.absoluteFilePath(), QDirIterator::Subdirectories);
                 while (dirIt.hasNext()) {
-                    if (m_abortFlag)
-                        return this->quitWaitingAbortEventLoop();
+                    if (this->abortRequested())
+                        return;
 
                     dirIt.next();
                     const QFileInfo subFileInfo = dirIt.fileInfo();
@@ -140,8 +113,6 @@ void DirIterator::iterate()
             emit taskResultItem(BaseFileTask::ResultItem::createError(inputAbsPath, errorText));
         }
     } // end foreach
-
-    emit taskFinished();
 }
 
 bool DirIterator::acceptsInputFile(const QString &file) const
@@ -162,4 +133,12 @@ bool DirIterator::acceptsInputFile(const QString &file) const
     }
 
     return passFilter;
+}
+
+void DirIterator::onFutureFinished()
+{
+    if (!this->abortRequested())
+        emit taskFinished();
+    else
+        this->endAbortRequest();
 }

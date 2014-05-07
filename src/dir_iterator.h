@@ -42,7 +42,6 @@
 
 #include <QtCore/QVector>
 #include <QtCore/QRegExp>
-class QEventLoop;
 class QFileInfo;
 
 /*! \brief Provides recursive(directory) file iteration
@@ -67,20 +66,13 @@ public:
     void asyncExec();
     bool isRunning() const;
 
-    void abortTask();
-
-private slots:
-    void setAbortFlagOn();
-
 private:
-    void quitWaitingAbortEventLoop();
-
     void iterate();
     bool acceptsInputFile(const QString& file) const;
 
+    Q_SLOT void onFutureFinished();
+
     QFutureWatcher<void>* m_futureWatcher;
-    bool m_abortFlag;
-    QEventLoop* m_abortEventLoop;
 
     QStringList m_filters;
     QVector<QRegExp> m_filterRxVec;

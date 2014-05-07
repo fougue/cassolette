@@ -56,6 +56,7 @@ public:
 
     void asyncExec();
     void abortTask();
+    bool isRunning() const;
 
     typedef typename SECOND_TASK::InputType SecondTaskInputType;
     typedef CompositeFileTaskBridge<SecondTaskInputType> TaskBridge;
@@ -170,6 +171,12 @@ void CompositeFileTask<FIRST_TASK, SECOND_TASK>::abortTask()
 {
     m_firstTask->abortTask();
     m_secondTask->abortTask();
+}
+
+template<typename FIRST_TASK, typename SECOND_TASK>
+bool CompositeFileTask<FIRST_TASK, SECOND_TASK>::isRunning() const
+{
+    return m_firstTask->isRunning() || m_secondTask->isRunning();
 }
 
 template<typename FIRST_TASK, typename SECOND_TASK>
