@@ -90,6 +90,8 @@ template<typename SECOND_TASK_INPUT>
 class CompositeFileTaskBridge
 {
 public:
+    virtual ~CompositeFileTaskBridge();
+
     virtual void reset();
     virtual void onFirstTaskResultItem(const BaseFileTask::ResultItem&);
     virtual void onFirstTaskFinished();
@@ -200,6 +202,10 @@ void CompositeFileTask<FIRST_TASK, SECOND_TASK>::setTaskBridge(TaskBridge* bridg
 
 
 // CompositeFileTaskBridge<>
+
+template<typename SECOND_TASK_INPUT>
+CompositeFileTaskBridge<SECOND_TASK_INPUT>::~CompositeFileTaskBridge()
+{ }
 
 template<typename SECOND_TASK_INPUT>
 void CompositeFileTaskBridge<SECOND_TASK_INPUT>::reset()

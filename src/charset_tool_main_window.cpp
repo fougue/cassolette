@@ -183,6 +183,8 @@ void CharsetToolMainWindow::onTaskResultItem(const BaseFileTask::ResultItem &res
 {
     if (!resultItem.hasError()) {
         switch (m_currentTaskId) {
+        case CharsetToolMainWindow::NoTask:
+            break;
         case CharsetToolMainWindow::AnalyseTask:
             this->handleAnalyseResultItem(resultItem);
             break;

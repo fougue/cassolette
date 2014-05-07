@@ -100,28 +100,6 @@ void TextFileFormatDetector::Reset()
     m_detectedEncodingName = nullptr;
 }
 
-static bool acceptInputFile(const QString& file,
-                            const QVector<QRegExp>& filterRxVec,
-                            const QVector<QRegExp>& excludeRxVec)
-{
-    bool passFilter = filterRxVec.isEmpty();
-    foreach (const QRegExp& filterRx, filterRxVec) {
-        if (filterRx.indexIn(file) != -1) {
-            passFilter = true;
-            break;
-        }
-    }
-
-    if (passFilter) {
-        foreach (const QRegExp& excludeRx, excludeRxVec) {
-            if (excludeRx.indexIn(file) != -1)
-                return false;
-        }
-    }
-
-    return passFilter;
-}
-
 } // namespace internal
 
 CharsetDetector::CharsetDetector(QObject *parent)
