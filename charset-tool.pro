@@ -4,7 +4,17 @@ QT     += widgets concurrent
 CONFIG += c++11
 
 TARGET = charset-tool
-debug:TARGET = $$join(TARGET, , , _d)
+CONFIG(debug, debug|release) {
+  TARGET = $$join(TARGET, , , _d)
+} else {
+  CONFIG -= console
+}
+
+contains(QT_ARCH, i386) {
+  APP_TARGET_ARCH = x86_32
+} else {
+  APP_TARGET_ARCH = $$QT_ARCH
+}
 
 INCLUDEPATH += src \
                src/3rdparty
@@ -45,12 +55,15 @@ FORMS += \
 
 RESOURCES += charset-tool.qrc
 
+win32:QMAKE_SUBSTITUTES += env_win.bat.in
+
+OTHER_FILES += readme.md \
+               deploy/windows/setup.iss \
+               $$QMAKE_SUBSTITUTES
+
 
 # Mozilla Universal Character Set Detector library
 include(src/3rdparty/ucsd/ucsd.pri)
 
 # FougTools
 include(src/3rdparty/fougtools/qttools/qttools.pri)
-
-
-OTHER_FILES += readme.md
