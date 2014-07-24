@@ -39,9 +39,9 @@
 #define CHARSET_TOOL_MAIN_WINDOW_H
 
 #include "base_file_task.h"
-class CharsetDetector;
-class CharsetEncoder;
-class DirIterator;
+class FileCharsetDetectionTask;
+class FileCharsetEncodingTask;
+class DirIterationTask;
 class ProgressDialog;
 
 #include <QtWidgets/QFileIconProvider>
@@ -98,9 +98,9 @@ private:
     QString m_lastInputDir;
     ProgressDialog* m_taskProgressDialog;
 
-    CharsetDetector* m_csDetector;
-    CharsetEncoder* m_csEncoder;
-    DirIterator* m_dirIterator;
+    FileCharsetDetectionTask* m_csDetector;
+    FileCharsetEncodingTask* m_csEncoder;
+    DirIterationTask* m_dirIterator;
     BaseFileTask* m_listAndAnalyseTask;
 
     TaskId m_currentTaskId;

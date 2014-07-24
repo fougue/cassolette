@@ -37,7 +37,6 @@
 
 #include <QtWidgets/QApplication>
 
-#include "charset_detector.h"
 #include "charset_tool_main_window.h"
 
 int main(int argc, char** argv)

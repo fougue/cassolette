@@ -35,7 +35,7 @@
 **
 ****************************************************************************/
 
-#include "dir_iterator.h"
+#include "dir_iteration_task.h"
 
 #include <functional>
 #include <QtConcurrent/QtConcurrentRun>
@@ -43,17 +43,17 @@
 #include <QtCore/QDirIterator>
 #include <QtCore/QtDebug>
 
-DirIterator::DirIterator(QObject *parent)
+DirIterationTask::DirIterationTask(QObject *parent)
     : BaseFileTask(parent),
       m_futureWatcher(new QFutureWatcher<void>(this))
 {
     QObject::connect(m_futureWatcher, &QFutureWatcher<void>::started,
-                     this, &DirIterator::taskStarted);
+                     this, &DirIterationTask::taskStarted);
     QObject::connect(m_futureWatcher, &QFutureWatcher<void>::finished,
-                     this, &DirIterator::onFutureFinished);
+                     this, &DirIterationTask::onFutureFinished);
 }
 
-void DirIterator::setFilters(const QStringList &filters)
+void DirIterationTask::setFilters(const QStringList &filters)
 {
     m_filters = filters;
     m_filterRxVec.clear();
@@ -61,7 +61,7 @@ void DirIterator::setFilters(const QStringList &filters)
         m_filterRxVec.append(QRegExp(filter.trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
 }
 
-void DirIterator::setExcludes(const QStringList &excludes)
+void DirIterationTask::setExcludes(const QStringList &excludes)
 {
     m_excludes = excludes;
     m_excludeRxVec.clear();
@@ -69,22 +69,22 @@ void DirIterator::setExcludes(const QStringList &excludes)
         m_excludeRxVec.append(QRegExp(exclude.trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
 }
 
-void DirIterator::setInput(const QStringList &fileOrFolderList)
+void DirIterationTask::setInput(const QStringList &fileOrFolderList)
 {
     m_fileOrFolderList = fileOrFolderList;
 }
 
-void DirIterator::asyncExec()
+void DirIterationTask::asyncExec()
 {
-    m_futureWatcher->setFuture(QtConcurrent::run(std::bind(&DirIterator::iterate, this)));
+    m_futureWatcher->setFuture(QtConcurrent::run(std::bind(&DirIterationTask::iterate, this)));
 }
 
-bool DirIterator::isRunning() const
+bool DirIterationTask::isRunning() const
 {
     return m_futureWatcher->isRunning();
 }
 
-void DirIterator::iterate()
+void DirIterationTask::iterate()
 {
     foreach (const QString& input, m_fileOrFolderList) {
         if (this->abortRequested())
@@ -117,7 +117,7 @@ void DirIterator::iterate()
     } // end foreach
 }
 
-bool DirIterator::acceptsInputFile(const QString &file) const
+bool DirIterationTask::acceptsInputFile(const QString &file) const
 {
     bool passFilter = m_filterRxVec.isEmpty();
     foreach (const QRegExp& filterRx, m_filterRxVec) {
@@ -137,7 +137,7 @@ bool DirIterator::acceptsInputFile(const QString &file) const
     return passFilter;
 }
 
-void DirIterator::onFutureFinished()
+void DirIterationTask::onFutureFinished()
 {
     if (!this->abortRequested())
         emit taskFinished();

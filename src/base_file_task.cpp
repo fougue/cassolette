@@ -117,11 +117,12 @@ void BaseFileTask::createFutureWatcher()
 {
     if (m_futureWatcher == nullptr) {
         m_futureWatcher = new QFutureWatcher<ResultItem>(this);
-        QObject::connect(m_futureWatcher, SIGNAL(started()), this, SIGNAL(taskStarted()));
-        QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureFinished()));
-        //QObject::connect(m_futureWatcher, SIGNAL(canceled()), this, SIGNAL(taskAborted()));
-        QObject::connect(m_futureWatcher, SIGNAL(resultReadyAt(int)),
-                         this, SLOT(onTaskResultReadyAt(int)));
+        QObject::connect(m_futureWatcher, &QFutureWatcher<ResultItem>::started,
+                         this, &BaseFileTask::taskStarted);
+        QObject::connect(m_futureWatcher, &QFutureWatcher<ResultItem>::finished,
+                         this, &BaseFileTask::onFutureFinished);
+        QObject::connect(m_futureWatcher, &QFutureWatcher<ResultItem>::resultReadyAt,
+                         this, &BaseFileTask::onTaskResultReadyAt);
 
         QObject::connect(m_futureWatcher, &FutureWatcher::progressRangeChanged,
                          this, &BaseFileTask::taskProgressRangeChanged);

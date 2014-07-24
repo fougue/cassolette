@@ -21,34 +21,31 @@ INCLUDEPATH += src \
 
 HEADERS += \
     src/charset_tool_main_window.h \
-    src/input_filter_dialog.h \
-    src/editable_list_widget.h \
-    src/charset_detector.h \
     src/select_charset_dialog.h \
-    src/charset_encoder.h \
     src/base_file_task.h \
     src/progress_dialog.h \
     src/log_widget.h \
-    src/dir_iterator.h \
-    src/composite_file_task.h
+    src/composite_file_task.h \
+    src/editable_list_widget.h \
+    src/file_charset_detection_task.h \
+    src/file_charset_encoding_task.h \
+    src/dir_iteration_task.h
 
 SOURCES += \
     src/main.cpp \
     src/charset_tool_main_window.cpp \
-    src/input_filter_dialog.cpp \
-    src/editable_list_widget.cpp \
-    src/charset_detector.cpp \
     src/select_charset_dialog.cpp \
-    src/charset_encoder.cpp \
     src/base_file_task.cpp \
     src/progress_dialog.cpp \
     src/log_widget.cpp \
-    src/dir_iterator.cpp \
-    src/composite_file_task.cpp
+    src/composite_file_task.cpp \
+    src/editable_list_widget.cpp \
+    src/file_charset_detection_task.cpp \
+    src/file_charset_encoding_task.cpp \
+    src/dir_iteration_task.cpp
 
 FORMS += \
     src/charset_tool_main_window.ui \
-    src/input_filter_dialog.ui \
     src/select_charset_dialog.ui \
     src/progress_dialog.ui \
     src/log_widget.ui

@@ -35,31 +35,47 @@
 **
 ****************************************************************************/
 
-#include "editable_list_widget.h"
+#ifndef FILE_CHARSET_ENCODING_TASK_H
+#define FILE_CHARSET_ENCODING_TASK_H
 
-#include <fougtools/qttools/gui/item_view_buttons.h>
+#include "base_file_task.h"
+#include <QtCore/QHash>
+#include <QtCore/QVector>
+class QTextCodec;
 
-EditableListWidget::EditableListWidget(QWidget *parent)
-    : QListWidget(parent)
+/*! \brief Provides encoding of files to a target character set
+ *
+ *  BaseFileTask::ResultItem::payload contains the target character set
+ */
+class FileCharsetEncodingTask : public BaseFileTask
 {
-    qttools::ItemViewButtons* itemBtns = new qttools::ItemViewButtons(this, this);
+    Q_OBJECT
 
-    QIcon removeIcon;
-    removeIcon.addPixmap(QPixmap(":/images/list-remove.png"), QIcon::Normal);
-    removeIcon.addPixmap(QPixmap(":/images/list-remove_active.png"), QIcon::Active);
+public:
+    struct InputFile
+    {
+        InputFile();
+        InputFile(const QString& pFilePath, const QByteArray& pCharset);
+        QString filePath;
+        QByteArray charset;
+    };
+    typedef QVector<InputFile> InputType;
 
-    itemBtns->installDefaultItemDelegate();
-    itemBtns->addButton(0);
-    itemBtns->setButtonIcon(0, removeIcon);
-    itemBtns->setButtonToolTip(0, tr("Delete item"));
-    itemBtns->setButtonDetection(0, -1, QVariant());
-    QObject::connect(itemBtns, &qttools::ItemViewButtons::buttonClicked,
-                     this, &EditableListWidget::onItemButtonClicked);
-}
+    FileCharsetEncodingTask(QObject *parent = nullptr);
 
-void EditableListWidget::onItemButtonClicked(int btnId, const QModelIndex &index)
-{
-    if (btnId == 0) { // "Delete" button
-        this->model()->removeRow(index.row());
-    }
-}
+    QByteArray targetCharset() const;
+    void setTargetCharset(const QByteArray& charset);
+
+    void setInput(const QVector<InputFile>& fileVec);
+
+    void asyncExec();
+
+private:
+    BaseFileTask::ResultItem encodeFile(const InputFile& inputFile);
+
+    QVector<InputFile> m_inputFileVec;
+    QHash<QByteArray, QTextCodec*> m_codecCache;
+    QTextCodec* m_targetCodec;
+};
+
+#endif // FILE_CHARSET_ENCODING_TASK_H

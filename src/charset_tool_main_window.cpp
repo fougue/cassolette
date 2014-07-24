@@ -44,10 +44,10 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QThread>
 
-#include "charset_detector.h"
-#include "charset_encoder.h"
+#include "file_charset_detection_task.h"
+#include "file_charset_encoding_task.h"
 #include "composite_file_task.h"
-#include "dir_iterator.h"
+#include "dir_iteration_task.h"
 #include "select_charset_dialog.h"
 #include "progress_dialog.h"
 #include "ui_charset_tool_main_window.h"
@@ -56,9 +56,9 @@ CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
     : QMainWindow(parent),
       m_ui(new Ui_CharsetToolMainWindow),
       m_taskProgressDialog(nullptr),
-      m_csDetector(new CharsetDetector(this)),
-      m_csEncoder(new CharsetEncoder(this)),
-      m_dirIterator(new DirIterator(this)),
+      m_csDetector(new FileCharsetDetectionTask(this)),
+      m_csEncoder(new FileCharsetEncodingTask(this)),
+      m_dirIterator(new DirIterationTask(this)),
       m_listAndAnalyseTask(newCompositeFileTask(m_dirIterator,
                                                 m_csDetector,
                                                 new CompositeFileTaskBridge_QStringList)),
@@ -155,16 +155,15 @@ void CharsetToolMainWindow::runConversion()
     SelectCharsetDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
         const QByteArray charset = dialog.selectedCharset();
-        const QString charsetStr = QString::fromUtf8(charset);
         this->setCurrentTask(CharsetToolMainWindow::ConversionTask);
 
         // Create vector of input files
         const QList<QTreeWidgetItem*> selectedFileItems = m_ui->analyseTreeWidget->selectedItems();
-        QVector<CharsetEncoder::InputFile> inputFileVec;
+        QVector<FileCharsetEncodingTask::InputFile> inputFileVec;
         inputFileVec.reserve(selectedFileItems.size());
         foreach (const QTreeWidgetItem* fileItem, selectedFileItems) {
-            inputFileVec.append(CharsetEncoder::InputFile(fileItem->text(1),
-                                                          fileItem->text(0).toUtf8()));
+            inputFileVec.append(FileCharsetEncodingTask::InputFile(fileItem->text(1),
+                                                                   fileItem->text(0).toUtf8()));
         }
 
         m_csEncoder->setTargetCharset(charset);

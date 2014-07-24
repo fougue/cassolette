@@ -35,31 +35,37 @@
 **
 ****************************************************************************/
 
-#include "editable_list_widget.h"
+#ifndef FILE_CHARSET_DETECTION_TASK_H
+#define FILE_CHARSET_DETECTION_TASK_H
 
-#include <fougtools/qttools/gui/item_view_buttons.h>
+#include "base_file_task.h"
 
-EditableListWidget::EditableListWidget(QWidget *parent)
-    : QListWidget(parent)
+#include <QtCore/QStringList>
+#include <QtCore/QThreadStorage>
+
+namespace Internal { class TextFileFormatDetector; }
+
+/*! \brief Provides detection of the character set used to encode a file
+ *
+ *  BaseFileTask::ResultItem::payload contains the detected character set
+ */
+class FileCharsetDetectionTask : public BaseFileTask
 {
-    qttools::ItemViewButtons* itemBtns = new qttools::ItemViewButtons(this, this);
+    Q_OBJECT
 
-    QIcon removeIcon;
-    removeIcon.addPixmap(QPixmap(":/images/list-remove.png"), QIcon::Normal);
-    removeIcon.addPixmap(QPixmap(":/images/list-remove_active.png"), QIcon::Active);
+public:
+    typedef QStringList InputType;
 
-    itemBtns->installDefaultItemDelegate();
-    itemBtns->addButton(0);
-    itemBtns->setButtonIcon(0, removeIcon);
-    itemBtns->setButtonToolTip(0, tr("Delete item"));
-    itemBtns->setButtonDetection(0, -1, QVariant());
-    QObject::connect(itemBtns, &qttools::ItemViewButtons::buttonClicked,
-                     this, &EditableListWidget::onItemButtonClicked);
-}
+    FileCharsetDetectionTask(QObject* parent = nullptr);
 
-void EditableListWidget::onItemButtonClicked(int btnId, const QModelIndex &index)
-{
-    if (btnId == 0) { // "Delete" button
-        this->model()->removeRow(index.row());
-    }
-}
+    void setInput(const QStringList& filePathList);
+    void asyncExec();
+
+private:
+    BaseFileTask::ResultItem detectFile(const QString& filePath);
+
+    QStringList m_filePathList;
+    QThreadStorage<Internal::TextFileFormatDetector*> m_detectorByThread;
+};
+
+#endif // FILE_CHARSET_DETECTION_TASK_H

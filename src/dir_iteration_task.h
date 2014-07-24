@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef DIR_ITERATOR_H
-#define DIR_ITERATOR_H
+#ifndef DIR_ITERATION_TASK_H
+#define DIR_ITERATION_TASK_H
 
 #include "base_file_task.h"
 
@@ -48,16 +48,17 @@ class QFileInfo;
  *
  *  BaseFileTask::ResultItem::filePath and payload contains the same value
  *
- *  \note DirIterator does not set BaseFileTask::inputSize() so task progress cannot be computed
+ *  \note DirIterationTask does not set BaseFileTask::inputSize() so task progress cannot be
+ *        computed
  */
-class DirIterator : public BaseFileTask
+class DirIterationTask : public BaseFileTask
 {
     Q_OBJECT
 
 public:
     typedef QStringList InputType;
 
-    DirIterator(QObject* parent = nullptr);
+    DirIterationTask(QObject* parent = nullptr);
 
     void setFilters(const QStringList& filters);
     void setExcludes(const QStringList& excludes);
@@ -83,4 +84,4 @@ private:
     QStringList m_fileOrFolderList;
 };
 
-#endif // DIR_ITERATOR_H
+#endif // DIR_ITERATION_TASK_H
