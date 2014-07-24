@@ -38,8 +38,6 @@
 #ifndef CHARSET_TOOL_MAIN_WINDOW_H
 #define CHARSET_TOOL_MAIN_WINDOW_H
 
-#include "editable_list_widget.h"
-#include "input_filter_dialog.h"
 #include "base_file_task.h"
 class CharsetDetector;
 class CharsetEncoder;
@@ -61,7 +59,6 @@ public:
 private slots:
     void addInputFiles();
     void addInputFolder();
-    void editFilters();
 
     void runAnalyse();
     void runConversion();
@@ -106,8 +103,6 @@ private:
     DirIterator* m_dirIterator;
     BaseFileTask* m_listAndAnalyseTask;
 
-    InputFilterDialog::FilePatterns m_filterPatterns;
-    InputFilterDialog::FilePatterns m_excludePatterns;
     TaskId m_currentTaskId;
     QHash<QString, QTreeWidgetItem*> m_fileToItem;
     QFileIconProvider m_fileIconProvider;

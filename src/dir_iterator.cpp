@@ -47,8 +47,10 @@ DirIterator::DirIterator(QObject *parent)
     : BaseFileTask(parent),
       m_futureWatcher(new QFutureWatcher<void>(this))
 {
-    QObject::connect(m_futureWatcher, SIGNAL(started()), this, SIGNAL(taskStarted()));
-    QObject::connect(m_futureWatcher, SIGNAL(finished()), this, SLOT(onFutureFinished()));
+    QObject::connect(m_futureWatcher, &QFutureWatcher<void>::started,
+                     this, &DirIterator::taskStarted);
+    QObject::connect(m_futureWatcher, &QFutureWatcher<void>::finished,
+                     this, &DirIterator::onFutureFinished);
 }
 
 void DirIterator::setFilters(const QStringList &filters)
@@ -56,7 +58,7 @@ void DirIterator::setFilters(const QStringList &filters)
     m_filters = filters;
     m_filterRxVec.clear();
     foreach (const QString& filter, filters)
-        m_filterRxVec.append(QRegExp(filter, Qt::CaseSensitive, QRegExp::Wildcard));
+        m_filterRxVec.append(QRegExp(filter.trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
 }
 
 void DirIterator::setExcludes(const QStringList &excludes)
@@ -64,7 +66,7 @@ void DirIterator::setExcludes(const QStringList &excludes)
     m_excludes = excludes;
     m_excludeRxVec.clear();
     foreach (const QString& exclude, excludes)
-        m_excludeRxVec.append(QRegExp(exclude, Qt::CaseSensitive, QRegExp::Wildcard));
+        m_excludeRxVec.append(QRegExp(exclude.trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
 }
 
 void DirIterator::setInput(const QStringList &fileOrFolderList)
@@ -119,7 +121,7 @@ bool DirIterator::acceptsInputFile(const QString &file) const
 {
     bool passFilter = m_filterRxVec.isEmpty();
     foreach (const QRegExp& filterRx, m_filterRxVec) {
-        if (filterRx.indexIn(file) != -1) {
+        if (filterRx.exactMatch(file)) {
             passFilter = true;
             break;
         }

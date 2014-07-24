@@ -48,7 +48,6 @@
 #include "charset_encoder.h"
 #include "composite_file_task.h"
 #include "dir_iterator.h"
-#include "input_filter_dialog.h"
 #include "select_charset_dialog.h"
 #include "progress_dialog.h"
 #include "ui_charset_tool_main_window.h"
@@ -67,12 +66,15 @@ CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
 {
     m_ui->setupUi(this);
 
-    QObject::connect(m_ui->inputFilterBtn, SIGNAL(clicked()), this, SLOT(editFilters()));
-    QObject::connect(m_ui->addFilesBtn, SIGNAL(clicked()), this, SLOT(addInputFiles()));
-    QObject::connect(m_ui->addFolderBtn, SIGNAL(clicked()), this, SLOT(addInputFolder()));
+    QObject::connect(m_ui->addFilesBtn, &QAbstractButton::clicked,
+                     this, &CharsetToolMainWindow::addInputFiles);
+    QObject::connect(m_ui->addFolderBtn, &QAbstractButton::clicked,
+                     this, &CharsetToolMainWindow::addInputFolder);
 
-    QObject::connect(m_ui->runAnalyseBtn, SIGNAL(clicked()), this, SLOT(runAnalyse()));
-    QObject::connect(m_ui->convertCharsetBtn, SIGNAL(clicked()), this, SLOT(runConversion()));
+    QObject::connect(m_ui->runAnalyseBtn, &QAbstractButton::clicked,
+                     this, &CharsetToolMainWindow::runAnalyse);
+    QObject::connect(m_ui->convertCharsetBtn, &QAbstractButton::clicked,
+                     this, &CharsetToolMainWindow::runConversion);
     QObject::connect(m_ui->analyseTreeWidget, &QTreeWidget::itemSelectionChanged,
                      this, &CharsetToolMainWindow::updateTaskButtons);
 
@@ -83,9 +85,12 @@ CharsetToolMainWindow::CharsetToolMainWindow(QWidget *parent)
     this->connectTask(m_listAndAnalyseTask);
     this->connectTask(m_csEncoder);
 
-    QObject::connect(m_dirIterator, SIGNAL(taskStarted()), this, SLOT(onFileListingStarted()));
-    QObject::connect(m_csDetector, SIGNAL(taskStarted()), this, SLOT(onDetectionStarted()));
-    QObject::connect(m_csEncoder, SIGNAL(taskStarted()), this, SLOT(onConversionStarted()));
+    QObject::connect(m_dirIterator, &BaseFileTask::taskStarted,
+                     this, &CharsetToolMainWindow::onFileListingStarted);
+    QObject::connect(m_csDetector, &BaseFileTask::taskStarted,
+                     this, &CharsetToolMainWindow::onDetectionStarted);
+    QObject::connect(m_csEncoder, &BaseFileTask::taskStarted,
+                     this, &CharsetToolMainWindow::onConversionStarted);
 
     // Init
     this->setCurrentTask(m_currentTaskId);
@@ -125,17 +130,6 @@ void CharsetToolMainWindow::addInputFolder()
     }
 }
 
-void CharsetToolMainWindow::editFilters()
-{
-    InputFilterDialog dialog(this);
-    dialog.installFilterPatterns(m_filterPatterns);
-    dialog.installExcludePatterns(m_excludePatterns);
-    if (dialog.exec() == QDialog::Accepted) {
-        m_filterPatterns = dialog.filterPatterns();
-        m_excludePatterns = dialog.excludePatterns();
-    }
-}
-
 void CharsetToolMainWindow::runAnalyse()
 {
     this->setCurrentTask(CharsetToolMainWindow::AnalyseTask);
@@ -149,8 +143,8 @@ void CharsetToolMainWindow::runAnalyse()
     for (int row = 0; row < inputCount; ++row)
         inputList += m_ui->inputListWidget->item(row)->text();
 
-    m_dirIterator->setFilters(m_filterPatterns.appliablePatterns());
-    m_dirIterator->setExcludes(m_excludePatterns.appliablePatterns());
+    m_dirIterator->setFilters(m_ui->filePatternCombo->currentText().split(QLatin1Char(','),
+                                                                          QString::SkipEmptyParts));
     m_dirIterator->setInput(inputList);
 
     m_listAndAnalyseTask->asyncExec();
@@ -328,8 +322,8 @@ void CharsetToolMainWindow::createTaskProgressDialog(const QString &labelText, i
 {
     if (m_taskProgressDialog == nullptr) {
         m_taskProgressDialog = new ProgressDialog(this);
-        QObject::connect(m_taskProgressDialog, SIGNAL(canceled()),
-                         this, SLOT(onProgressDialogCanceled()));
+        QObject::connect(m_taskProgressDialog, &ProgressDialog::canceled,
+                         this, &CharsetToolMainWindow::onProgressDialogCanceled);
     }
     m_taskProgressDialog->setLabelText(labelText);
     m_taskProgressDialog->setValue(0);
