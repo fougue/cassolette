@@ -38,7 +38,7 @@
 #include "input_filter_dialog.h"
 #include "ui_input_filter_dialog.h"
 
-namespace internal {
+namespace Internal {
 
 static QStringList allTexts(const QListWidget* listWidget)
 {
@@ -56,7 +56,7 @@ static void installTexts(QListWidget* listWidget, const QStringList& textList)
         listWidget->addItem(text);
 }
 
-} // namespace internal
+} // namespace Internal
 
 InputFilterDialog_FilePatterns::InputFilterDialog_FilePatterns()
     : checked(true)
@@ -91,7 +91,7 @@ InputFilterDialog::~InputFilterDialog()
 
 void InputFilterDialog::installFilterPatterns(const FilePatterns &fp)
 {
-    internal::installTexts(m_ui->filterListWidget, fp.patterns);
+    Internal::installTexts(m_ui->filterListWidget, fp.patterns);
     m_ui->filterCheckBox->setChecked(fp.checked);
 }
 
@@ -99,13 +99,13 @@ InputFilterDialog::FilePatterns InputFilterDialog::filterPatterns() const
 {
     FilePatterns fp;
     fp.checked = m_ui->filterCheckBox->isChecked();
-    fp.patterns = internal::allTexts(m_ui->filterListWidget);
+    fp.patterns = Internal::allTexts(m_ui->filterListWidget);
     return fp;
 }
 
 void InputFilterDialog::installExcludePatterns(const FilePatterns &fp)
 {
-    internal::installTexts(m_ui->excludeListWidget, fp.patterns);
+    Internal::installTexts(m_ui->excludeListWidget, fp.patterns);
     m_ui->excludeCheckBox->setChecked(fp.checked);
 }
 
@@ -113,7 +113,7 @@ InputFilterDialog::FilePatterns InputFilterDialog::excludePatterns() const
 {
     FilePatterns fp;
     fp.checked = m_ui->excludeCheckBox->isChecked();
-    fp.patterns = internal::allTexts(m_ui->excludeListWidget);
+    fp.patterns = Internal::allTexts(m_ui->excludeListWidget);
     return fp;
 }
 

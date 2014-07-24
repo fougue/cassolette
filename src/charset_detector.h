@@ -43,7 +43,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QThreadStorage>
 
-namespace internal { class TextFileFormatDetector; }
+namespace Internal { class TextFileFormatDetector; }
 
 /*! \brief Provides detection of the character set used to encode a file
  *
@@ -65,7 +65,7 @@ private:
     BaseFileTask::ResultItem detectFile(const QString& filePath);
 
     QStringList m_filePathList;
-    QThreadStorage<internal::TextFileFormatDetector*> m_detectorByThread;
+    QThreadStorage<Internal::TextFileFormatDetector*> m_detectorByThread;
 };
 
 #endif // CHARSET_DETECTOR_H

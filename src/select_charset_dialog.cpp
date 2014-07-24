@@ -47,12 +47,12 @@
 #include <QtGui/QStandardItemModel>
 #include <QtWidgets/QMessageBox>
 
-namespace internal {
+namespace Internal {
 
 static const char SelectCharsetDialog_lastCodecNameIniKey[] = "SelectCharsetDialog_lastCodecName";
 static const int  SelectCharsetDialog_codecDataRole = Qt::UserRole + 1;
 
-} // namespace internal
+} // namespace Internal
 
 SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
     : QDialog(parent),
@@ -68,7 +68,7 @@ SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
                      this, &SelectCharsetDialog::accept);
 
     QSettings appSettings;
-    const QString iniLastCodecName = appSettings.value(internal::SelectCharsetDialog_lastCodecNameIniKey,
+    const QString iniLastCodecName = appSettings.value(Internal::SelectCharsetDialog_lastCodecNameIniKey,
                                                        QLatin1String("UTF-8")).toString();
 
     QStandardItemModel* codecModel = new QStandardItemModel(m_filterCodecModel);
@@ -89,7 +89,7 @@ SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
 
         // Create list item for codec
         QStandardItem* codecItem = new QStandardItem(codecAliasList.join(QLatin1String(" / ")));
-        codecItem->setData(codecName, internal::SelectCharsetDialog_codecDataRole);
+        codecItem->setData(codecName, Internal::SelectCharsetDialog_codecDataRole);
         codecModel->appendRow(codecItem);
         codecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         if (codecName == iniLastCodecName)
@@ -117,7 +117,7 @@ QByteArray SelectCharsetDialog::selectedCharset() const
     const QModelIndex codecIndex = selectedCodecIndexes.size() == 1 ? selectedCodecIndexes.first() :
                                                                       QModelIndex();
     if (codecIndex.isValid())
-        return codecIndex.data(internal::SelectCharsetDialog_codecDataRole).toByteArray();
+        return codecIndex.data(Internal::SelectCharsetDialog_codecDataRole).toByteArray();
     return QByteArray();
 }
 
@@ -126,7 +126,7 @@ void SelectCharsetDialog::accept()
     const QByteArray currentCharset = this->selectedCharset();
     if (!currentCharset.isEmpty()) {
         QSettings appSettings;
-        appSettings.setValue(internal::SelectCharsetDialog_lastCodecNameIniKey, currentCharset);
+        appSettings.setValue(Internal::SelectCharsetDialog_lastCodecNameIniKey, currentCharset);
         QDialog::accept();
     }
     else {

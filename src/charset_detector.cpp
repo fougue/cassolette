@@ -49,7 +49,7 @@
 #include "ucsd/nscore.h"
 #include "ucsd/nsUniversalDetector.h"
 
-namespace internal {
+namespace Internal {
 
 /*! \brief Charset detector based on Mozilla's Universal CharSet Detector(UCSD) library
  *
@@ -100,7 +100,7 @@ void TextFileFormatDetector::Reset()
     m_detectedEncodingName = nullptr;
 }
 
-} // namespace internal
+} // namespace Internal
 
 CharsetDetector::CharsetDetector(QObject *parent)
     : BaseFileTask(parent)
@@ -127,8 +127,8 @@ BaseFileTask::ResultItem CharsetDetector::detectFile(const QString &filePath)
     BaseFileTask::ResultItem result;
 
     if (!m_detectorByThread.hasLocalData())
-        m_detectorByThread.setLocalData(new internal::TextFileFormatDetector(NS_FILTER_ALL));
-    internal::TextFileFormatDetector* formatDetector = m_detectorByThread.localData();
+        m_detectorByThread.setLocalData(new Internal::TextFileFormatDetector(NS_FILTER_ALL));
+    Internal::TextFileFormatDetector* formatDetector = m_detectorByThread.localData();
 
     const QFileInfo fileInfo(filePath);
     result.filePath = fileInfo.absoluteFilePath();

@@ -41,7 +41,7 @@
 #include <QtCore/QTime>
 #include <QtWidgets/QScrollBar>
 
-namespace internal {
+namespace Internal {
 
 static QColor mixColors(const QColor& a, const QColor& b)
 {
@@ -56,7 +56,7 @@ static QString currentTimeLogText()
     return QTime::currentTime().toString(Qt::DefaultLocaleShortDate);
 }
 
-} // namespace internal
+} // namespace Internal
 
 LogWidget::LogWidget(QWidget *parent)
     : QWidget(parent),
@@ -99,16 +99,16 @@ void LogWidget::appendLog(const QString &msg, LogFormat format)
 
     switch (format) {
     case LogWidget::InfoLog:
-        textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::blue)));
+        textFormat.setForeground(Internal::mixColors(pal.color(QPalette::Text), QColor(Qt::blue)));
         textFormat.setFontWeight(QFont::Normal);
         break;
     case LogWidget::WarningLog:
-        textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text),
+        textFormat.setForeground(Internal::mixColors(pal.color(QPalette::Text),
                                                      QColor(255, 165 ,0))); // Orange
         textFormat.setFontWeight(QFont::Bold);
         break;
     case LogWidget::ErrorLog:
-        textFormat.setForeground(internal::mixColors(pal.color(QPalette::Text), QColor(Qt::red)));
+        textFormat.setForeground(Internal::mixColors(pal.color(QPalette::Text), QColor(Qt::red)));
         textFormat.setFontWeight(QFont::Bold);
         break;
     }
@@ -119,7 +119,7 @@ void LogWidget::appendLog(const QString &msg, LogFormat format)
     cursor.movePosition(QTextCursor::End);
     cursor.beginEditBlock();
     //: %1 current time of log message    %2 log message
-    cursor.insertText(tr("%1: %2").arg(internal::currentTimeLogText(), msg) + QLatin1Char('\n'),
+    cursor.insertText(tr("%1: %2").arg(Internal::currentTimeLogText(), msg) + QLatin1Char('\n'),
                       textFormat);
     cursor.endEditBlock();
 
