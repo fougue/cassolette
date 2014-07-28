@@ -35,37 +35,39 @@
 **
 ****************************************************************************/
 
-#ifndef FILE_CHARSET_DETECTION_TASK_H
-#define FILE_CHARSET_DETECTION_TASK_H
+#ifndef MOZILLA_UNIVERSAL_CHARSET_DETECTOR_H
+#define MOZILLA_UNIVERSAL_CHARSET_DETECTOR_H
 
-#include "base_file_task.h"
+#include "abstract_charset_detector.h"
 
-#include <QtCore/QStringList>
-#include <QtCore/QThreadStorage>
+#include <ucsd/nscore.h>
+#include <ucsd/nsUniversalDetector.h>
 
-class AbstractCharsetDetector;
-
-/*! \brief Provides detection of the character set used to encode a file
+/*! \brief Charset detector based on Mozilla's Universal CharSet Detector(UCSD) library
  *
- *  BaseFileTask::ResultItem::payload contains the detected character set
+ *  Class nsUniversalDetector has to be redefined because nsUniversalDetector::Report() is pure
+ *  virtual (see http://www-archive.mozilla.org/projects/intl/detectorsrc.html  Step 2, Write a
+ *  wrapper class)
  */
-class FileCharsetDetectionTask : public BaseFileTask
+class MozillaUniversalCharsetDetector :
+        public AbstractCharsetDetector,
+        protected nsUniversalDetector
 {
-    Q_OBJECT
-
 public:
-    typedef QStringList InputType;
+    MozillaUniversalCharsetDetector(PRUint32 langFilter);
 
-    FileCharsetDetectionTask(QObject* parent = nullptr);
+    QByteArray detectedEncodingName() const override;
 
-    void setInput(const QStringList& filePathList);
-    void asyncExec();
+    void init() override;
+    bool handleData(const QByteArray& buffer, Error* error) override;
+    void dataEnd() override;
+
+protected:
+    void Report(const char* charset) override;
+    void Reset() override;
 
 private:
-    BaseFileTask::ResultItem detectFile(const QString& filePath);
-
-    QStringList m_filePathList;
-    QThreadStorage<AbstractCharsetDetector*> m_detectorByThread;
+    QByteArray m_detectedEncodingName;
 };
 
-#endif // FILE_CHARSET_DETECTION_TASK_H
+#endif // MOZILLA_UNIVERSAL_CHARSET_DETECTOR_H

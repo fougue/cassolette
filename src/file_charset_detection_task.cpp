@@ -37,6 +37,9 @@
 
 #include "file_charset_detection_task.h"
 
+#include "mozilla_universal_charset_detector.h"
+#include "win_imulti_language_charset_detector.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QDirIterator>
 #include <QtCore/QFile>
@@ -45,62 +48,6 @@
 #include <QtCore/QTextCodec>
 #include <QtConcurrent/QtConcurrent>
 #include <functional>
-
-#include "ucsd/nscore.h"
-#include "ucsd/nsUniversalDetector.h"
-
-namespace Internal {
-
-/*! \brief Charset detector based on Mozilla's Universal CharSet Detector(UCSD) library
- *
- *  Class nsUniversalDetector has to be redefined because nsUniversalDetector::Report() is pure
- *  virtual (see http://www-archive.mozilla.org/projects/intl/detectorsrc.html  Step 2, Write a
- *  wrapper class)
- */
-class TextFileFormatDetector : public nsUniversalDetector
-{
-public:
-    TextFileFormatDetector(PRUint32 langFilter);
-
-    const char* detectedEncodingName() const;
-    void init();
-
-protected:
-    void Report(const char* charset);
-    void Reset();
-
-private:
-    const char* m_detectedEncodingName;
-};
-
-TextFileFormatDetector::TextFileFormatDetector(PRUint32 langFilter)
-    : nsUniversalDetector(langFilter),
-      m_detectedEncodingName(nullptr)
-{
-}
-
-const char *TextFileFormatDetector::detectedEncodingName() const
-{
-    return m_detectedEncodingName;
-}
-
-void TextFileFormatDetector::init()
-{
-    this->Reset();
-}
-
-void TextFileFormatDetector::Report(const char *charset)
-{
-    m_detectedEncodingName = charset;
-}
-
-void TextFileFormatDetector::Reset()
-{
-    nsUniversalDetector::Reset();
-    m_detectedEncodingName = nullptr;
-}
-
-} // namespace Internal
 
 FileCharsetDetectionTask::FileCharsetDetectionTask(QObject *parent)
     : BaseFileTask(parent)
@@ -116,9 +63,10 @@ void FileCharsetDetectionTask::setInput(const QStringList &filePathList)
 
 void FileCharsetDetectionTask::asyncExec()
 {
-    auto future = QtConcurrent::mapped(m_filePathList, std::bind(&FileCharsetDetectionTask::detectFile,
-                                                                 this,
-                                                                 std::placeholders::_1));
+    auto future = QtConcurrent::mapped(m_filePathList,
+                                       std::bind(&FileCharsetDetectionTask::detectFile,
+                                                 this,
+                                                 std::placeholders::_1));
     this->futureWatcher()->setFuture(future);
 }
 
@@ -126,9 +74,11 @@ BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(const QString &fil
 {
     BaseFileTask::ResultItem result;
 
-    if (!m_detectorByThread.hasLocalData())
-        m_detectorByThread.setLocalData(new Internal::TextFileFormatDetector(NS_FILTER_ALL));
-    Internal::TextFileFormatDetector* formatDetector = m_detectorByThread.localData();
+    if (!m_detectorByThread.hasLocalData()) {
+        m_detectorByThread.setLocalData(new MozillaUniversalCharsetDetector(NS_FILTER_ALL));
+        //m_detectorByThread.setLocalData(new WinIMultiLanguageCharsetDetector);
+    }
+    AbstractCharsetDetector* formatDetector = m_detectorByThread.localData();
 
     const QFileInfo fileInfo(filePath);
     result.filePath = fileInfo.absoluteFilePath();
@@ -137,11 +87,18 @@ BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(const QString &fil
         if (file.open(QIODevice::ReadOnly)) {
             const QByteArray fileContents = file.readAll();
             formatDetector->init();
-            const nsresult handleRes = formatDetector->HandleData(fileContents.constData(),
-                                                                  fileContents.size());
-            formatDetector->DataEnd();
-            if (handleRes == NS_OK && formatDetector->detectedEncodingName() != nullptr)
-                result.payload = formatDetector->detectedEncodingName();
+
+            AbstractCharsetDetector::Error detectError;
+            const bool handleSuccess = formatDetector->handleData(fileContents, &detectError);
+            formatDetector->dataEnd();
+
+            if (handleSuccess) {
+                if (!formatDetector->detectedEncodingName().isEmpty())
+                    result.payload = formatDetector->detectedEncodingName();
+            }
+            else {
+                result.errorText = detectError.message;
+            }
         }
         else {
             result.errorText = !file.errorString().isEmpty() ? file.errorString() :

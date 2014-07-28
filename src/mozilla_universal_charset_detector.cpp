@@ -35,37 +35,58 @@
 **
 ****************************************************************************/
 
-#ifndef FILE_CHARSET_DETECTION_TASK_H
-#define FILE_CHARSET_DETECTION_TASK_H
+#include "mozilla_universal_charset_detector.h"
 
-#include "base_file_task.h"
+#include <QtCore/QString>
 
-#include <QtCore/QStringList>
-#include <QtCore/QThreadStorage>
+#include <fougtools/cpptools/memory_utils.h>
 
-class AbstractCharsetDetector;
+namespace {
 
-/*! \brief Provides detection of the character set used to encode a file
- *
- *  BaseFileTask::ResultItem::payload contains the detected character set
- */
-class FileCharsetDetectionTask : public BaseFileTask
+AbstractCharsetDetector::Error internal_toDetectionError(nsresult error)
 {
-    Q_OBJECT
+    QString errorMsg;
+    if (error == NS_ERROR_OUT_OF_MEMORY)
+        errorMsg = QLatin1String("NS_ERROR_OUT_OF_MEMORY");
+    return AbstractCharsetDetector::Error(static_cast<int64_t>(error), errorMsg);
+}
 
-public:
-    typedef QStringList InputType;
+} // Anonymous namespace
 
-    FileCharsetDetectionTask(QObject* parent = nullptr);
+MozillaUniversalCharsetDetector::MozillaUniversalCharsetDetector(PRUint32 langFilter)
+    : nsUniversalDetector(langFilter)
+{
+}
 
-    void setInput(const QStringList& filePathList);
-    void asyncExec();
+QByteArray MozillaUniversalCharsetDetector::detectedEncodingName() const
+{
+    return m_detectedEncodingName;
+}
 
-private:
-    BaseFileTask::ResultItem detectFile(const QString& filePath);
+void MozillaUniversalCharsetDetector::init()
+{
+    this->Reset();
+}
 
-    QStringList m_filePathList;
-    QThreadStorage<AbstractCharsetDetector*> m_detectorByThread;
-};
+bool MozillaUniversalCharsetDetector::handleData(const QByteArray &buffer, Error *error)
+{
+    const nsresult res = nsUniversalDetector::HandleData(buffer.constData(), buffer.size());
+    cpp::checkedAssign(error, internal_toDetectionError(res));
+    return res == NS_OK;
+}
 
-#endif // FILE_CHARSET_DETECTION_TASK_H
+void MozillaUniversalCharsetDetector::dataEnd()
+{
+    nsUniversalDetector::DataEnd();
+}
+
+void MozillaUniversalCharsetDetector::Report(const char *charset)
+{
+    m_detectedEncodingName = charset;
+}
+
+void MozillaUniversalCharsetDetector::Reset()
+{
+    nsUniversalDetector::Reset();
+    m_detectedEncodingName.clear();
+}

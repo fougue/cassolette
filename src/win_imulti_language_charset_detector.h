@@ -35,37 +35,28 @@
 **
 ****************************************************************************/
 
-#ifndef FILE_CHARSET_DETECTION_TASK_H
-#define FILE_CHARSET_DETECTION_TASK_H
+#ifndef WIN_IMULTI_LANGUAGE_CHARSET_DETECTOR_H
+#define WIN_IMULTI_LANGUAGE_CHARSET_DETECTOR_H
 
-#include "base_file_task.h"
+#include "abstract_charset_detector.h"
+struct IMultiLanguage2;
 
-#include <QtCore/QStringList>
-#include <QtCore/QThreadStorage>
-
-class AbstractCharsetDetector;
-
-/*! \brief Provides detection of the character set used to encode a file
- *
- *  BaseFileTask::ResultItem::payload contains the detected character set
- */
-class FileCharsetDetectionTask : public BaseFileTask
+class WinIMultiLanguageCharsetDetector : public AbstractCharsetDetector
 {
-    Q_OBJECT
-
 public:
-    typedef QStringList InputType;
+    WinIMultiLanguageCharsetDetector();
+    ~WinIMultiLanguageCharsetDetector();
 
-    FileCharsetDetectionTask(QObject* parent = nullptr);
+    QByteArray detectedEncodingName() const override;
 
-    void setInput(const QStringList& filePathList);
-    void asyncExec();
+    void init() override;
+    bool handleData(const QByteArray& buffer, Error* error) override;
+    void dataEnd() override;
 
 private:
-    BaseFileTask::ResultItem detectFile(const QString& filePath);
-
-    QStringList m_filePathList;
-    QThreadStorage<AbstractCharsetDetector*> m_detectorByThread;
+    IMultiLanguage2* m_multiLang;
+    AbstractCharsetDetector::Error m_constructError;
+    QByteArray m_detectedEncodingName;
 };
 
-#endif // FILE_CHARSET_DETECTION_TASK_H
+#endif // WIN_IMULTI_LANGUAGE_CHARSET_DETECTOR_H

@@ -35,37 +35,30 @@
 **
 ****************************************************************************/
 
-#ifndef FILE_CHARSET_DETECTION_TASK_H
-#define FILE_CHARSET_DETECTION_TASK_H
+#ifndef ABSTRACT_CHARSET_DETECTOR_H
+#define ABSTRACT_CHARSET_DETECTOR_H
 
-#include "base_file_task.h"
+#include <cstdint>
+#include <QtCore/QString>
 
-#include <QtCore/QStringList>
-#include <QtCore/QThreadStorage>
-
-class AbstractCharsetDetector;
-
-/*! \brief Provides detection of the character set used to encode a file
- *
- *  BaseFileTask::ResultItem::payload contains the detected character set
- */
-class FileCharsetDetectionTask : public BaseFileTask
+class AbstractCharsetDetector
 {
-    Q_OBJECT
-
 public:
-    typedef QStringList InputType;
+    struct Error
+    {
+        Error();
+        Error(int64_t pCode, const QString& msg = QString());
+        int64_t code;
+        QString message;
+    };
 
-    FileCharsetDetectionTask(QObject* parent = nullptr);
+    virtual ~AbstractCharsetDetector();
 
-    void setInput(const QStringList& filePathList);
-    void asyncExec();
+    virtual QByteArray detectedEncodingName() const = 0;
 
-private:
-    BaseFileTask::ResultItem detectFile(const QString& filePath);
-
-    QStringList m_filePathList;
-    QThreadStorage<AbstractCharsetDetector*> m_detectorByThread;
+    virtual void init() = 0;
+    virtual bool handleData(const QByteArray& buffer, Error* error = nullptr) = 0;
+    virtual void dataEnd() = 0;
 };
 
-#endif // FILE_CHARSET_DETECTION_TASK_H
+#endif // ABSTRACT_CHARSET_DETECTOR_H
