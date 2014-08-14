@@ -56,16 +56,16 @@ public:
     ~ProgressDialog();
 
     QString labelText() const;
-    Q_SLOT void setLabelText(const QString& text);
+    void setLabelText(const QString& text);
 
     int minimumValue() const;
     int maximumValue() const;
-    Q_SLOT void setMinimumValue(int value);
-    Q_SLOT void setMaximumValue(int value);
-    Q_SLOT void setRangeValue(int min, int max);
+    void setMinimumValue(int value);
+    void setMaximumValue(int value);
+    void setRangeValue(int min, int max);
 
     int value() const;
-    Q_SLOT void setValue(int value);
+    void setValue(int value);
 
     bool wasCanceled() const;
 

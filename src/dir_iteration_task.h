@@ -64,14 +64,14 @@ public:
     void setExcludes(const QStringList& excludes);
     void setInput(const QStringList& fileOrFolderList);
 
-    void asyncExec();
-    bool isRunning() const;
+    void asyncExec() override;
+    bool isRunning() const override;
 
 private:
     void iterate();
     bool acceptsInputFile(const QString& file) const;
 
-    Q_SLOT void onFutureFinished();
+    void onFutureFinished();
 
     QFutureWatcher<void>* m_futureWatcher;
 

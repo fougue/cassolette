@@ -51,9 +51,9 @@
 #include <fougtools/cpptools/c_array_utils.h>
 #include <fougtools/cpptools/memory_utils.h>
 
-namespace {
+namespace Internal {
 
-bool confidenceLessThan(const DetectEncodingInfo& lhs, const DetectEncodingInfo& rhs)
+static bool confidenceLessThan(const DetectEncodingInfo& lhs, const DetectEncodingInfo& rhs)
 {
     return lhs.nConfidence < rhs.nConfidence;
 }
@@ -68,13 +68,13 @@ static QString hresultToQString(HRESULT hres)
 #endif // UNICODE
 }
 
-AbstractCharsetDetector::Error internal_toDetectionError(HRESULT error)
+static AbstractCharsetDetector::Error toDetectionError(HRESULT error)
 {
     return AbstractCharsetDetector::Error(static_cast<int64_t>(error),
                                           hresultToQString(error));
 }
 
-} // Anonymous namespace
+} // namespace Internal
 
 WinIMultiLanguageCharsetDetector::WinIMultiLanguageCharsetDetector()
     : m_multiLang(nullptr)
@@ -87,7 +87,7 @@ WinIMultiLanguageCharsetDetector::WinIMultiLanguageCharsetDetector()
                                                      CLSCTX_INPROC_SERVER,
                                                      IID_IMultiLanguage2,
                                                      (void**)&m_multiLang);
-    m_constructError = internal_toDetectionError(createInstError);
+    m_constructError = Internal::toDetectionError(createInstError);
 #endif // Q_OS_WIN
 }
 
@@ -124,20 +124,20 @@ bool WinIMultiLanguageCharsetDetector::handleData(const QByteArray &buffer, Erro
                                                          streamBuffer,
                                                          encodingInfoArray,
                                                          &encodingInfoCount);
-            cpp::checkedAssign(error, internal_toDetectionError(detectError));
+            cpp::checkedAssign(error, Internal::toDetectionError(detectError));
             streamBuffer->Release();
             if (detectError == S_OK) {
                 // Find best confident encoding
                 const auto encodingInfoArrayEnd = encodingInfoArray + encodingInfoCount;
                 auto iBestEncInfo = std::max_element(encodingInfoArray,
                                                      encodingInfoArrayEnd,
-                                                     &confidenceLessThan);
+                                                     &Internal::confidenceLessThan);
                 if (iBestEncInfo != encodingInfoArrayEnd) {
                     MIMECPINFO cpInfo;
                     const HRESULT getCpInfoError = m_multiLang->GetCodePageInfo((*iBestEncInfo).nCodePage,
                                                                                 (*iBestEncInfo).nLangID,
                                                                                 &cpInfo);
-                    cpp::checkedAssign(error, internal_toDetectionError(getCpInfoError));
+                    cpp::checkedAssign(error, Internal::toDetectionError(getCpInfoError));
                     if (getCpInfoError == S_OK) {
                         m_detectedEncodingName = QString::fromWCharArray(cpInfo.wszWebCharset).toUtf8();
 //                        m_detectedEncodingName =

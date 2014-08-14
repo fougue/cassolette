@@ -59,7 +59,7 @@ public:
     FileCharsetDetectionTask(QObject* parent = nullptr);
 
     void setInput(const QStringList& filePathList);
-    void asyncExec();
+    void asyncExec() override;
 
 private:
     BaseFileTask::ResultItem detectFile(const QString& filePath);

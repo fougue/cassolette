@@ -41,7 +41,6 @@ AbstractCharsetDetector::~AbstractCharsetDetector()
 {
 }
 
-
 AbstractCharsetDetector::Error::Error()
     : code(-1)
 {

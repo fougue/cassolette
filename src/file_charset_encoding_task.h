@@ -68,7 +68,7 @@ public:
 
     void setInput(const QVector<InputFile>& fileVec);
 
-    void asyncExec();
+    void asyncExec() override;
 
 private:
     BaseFileTask::ResultItem encodeFile(const InputFile& inputFile);

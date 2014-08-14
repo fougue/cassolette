@@ -51,7 +51,7 @@ public:
 
     QByteArray selectedCharset() const;
 
-    void accept();
+    void accept() override;
 
 private slots:
     void onFilterChanged(const QString& filter);

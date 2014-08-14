@@ -66,8 +66,8 @@ public:
 
     int inputSize() const;
 
-    Q_SLOT virtual void asyncExec();
-    Q_SLOT virtual void abortTask();
+    virtual void asyncExec();
+    virtual void abortTask();
     virtual bool isRunning() const;
 
 signals:
@@ -85,7 +85,7 @@ protected:
     void createFutureWatcher();
     QFutureWatcher<BaseFileTask::ResultItem> *futureWatcher() const;
 
-    Q_SLOT virtual void onTaskResultReadyAt(int resultId);
+    virtual void onTaskResultReadyAt(int resultId);
 
     void setInputSize(int size);
 
@@ -93,7 +93,7 @@ protected:
     void endAbortRequest();
 
 private:
-    Q_SLOT void onFutureFinished();
+    void onFutureFinished();
 
     QFutureWatcher<BaseFileTask::ResultItem>* m_futureWatcher;
     int m_inputSize;

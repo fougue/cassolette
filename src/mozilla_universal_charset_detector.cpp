@@ -41,9 +41,9 @@
 
 #include <fougtools/cpptools/memory_utils.h>
 
-namespace {
+namespace Internal {
 
-AbstractCharsetDetector::Error internal_toDetectionError(nsresult error)
+static AbstractCharsetDetector::Error toDetectionError(nsresult error)
 {
     QString errorMsg;
     if (error == NS_ERROR_OUT_OF_MEMORY)
@@ -51,7 +51,7 @@ AbstractCharsetDetector::Error internal_toDetectionError(nsresult error)
     return AbstractCharsetDetector::Error(static_cast<int64_t>(error), errorMsg);
 }
 
-} // Anonymous namespace
+} // namespace Internal
 
 MozillaUniversalCharsetDetector::MozillaUniversalCharsetDetector(PRUint32 langFilter)
     : nsUniversalDetector(langFilter)
@@ -71,7 +71,7 @@ void MozillaUniversalCharsetDetector::init()
 bool MozillaUniversalCharsetDetector::handleData(const QByteArray &buffer, Error *error)
 {
     const nsresult res = nsUniversalDetector::HandleData(buffer.constData(), buffer.size());
-    cpp::checkedAssign(error, internal_toDetectionError(res));
+    cpp::checkedAssign(error, Internal::toDetectionError(res));
     return res == NS_OK;
 }
 
