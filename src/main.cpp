@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     QApplication app(argc, argv);
 
     // Define settings informations once
-    QCoreApplication::setOrganizationName("FougSys");
+    QCoreApplication::setOrganizationName("Fougue");
     QCoreApplication::setOrganizationDomain("www.fougsys.fr");
     QCoreApplication::setApplicationName(QLatin1String("charset-tool"));
     //QCoreApplication::setApplicationVersion(versionNumber);

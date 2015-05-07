@@ -3,7 +3,7 @@
 
 #define MyAppName "Charset Tool"
 #define MyAppVersion "1.0"
-#define MyAppPublisher "FougSys Ltd"
+#define MyAppPublisher "Fougue Ltd"
 #define MyAppURL "http://www.fougsys.fr"
 #define MyAppExeName "charset-tool.exe"
 
@@ -26,7 +26,7 @@ AppId={{D63B6B07-8368-45BB-AD73-2493DB9BA5B0}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
-AppPublisher=FougSys Ltd.
+AppPublisher=Fougue Ltd.
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}

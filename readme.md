@@ -28,4 +28,4 @@ License
 `charset-tool` is available under CeCILL-B which is a BSD-like license. For more information, please
 see http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html
 
-Copyright (c) 2014, FougSys Ltd.
+Copyright (c) 2015, Fougue Ltd.
