@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef WIN_IMULTI_LANGUAGE_CHARSET_DETECTOR_H
-#define WIN_IMULTI_LANGUAGE_CHARSET_DETECTOR_H
+#pragma once
 
 #include "abstract_charset_detector.h"
 struct IMultiLanguage2;
@@ -58,5 +57,3 @@ private:
     AbstractCharsetDetector::Error m_constructError;
     QByteArray m_detectedEncodingName;
 };
-
-#endif // WIN_IMULTI_LANGUAGE_CHARSET_DETECTOR_H

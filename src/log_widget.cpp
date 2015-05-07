@@ -99,28 +99,37 @@ void LogWidget::appendLog(const QString &msg, LogFormat format)
 
     switch (format) {
     case LogWidget::InfoLog:
-        textFormat.setForeground(Internal::mixColors(pal.color(QPalette::Text), QColor(Qt::blue)));
+        textFormat.setForeground(Internal::mixColors(
+                                     pal.color(QPalette::Text),
+                                     QColor(Qt::blue)));
         textFormat.setFontWeight(QFont::Normal);
         break;
     case LogWidget::WarningLog:
-        textFormat.setForeground(Internal::mixColors(pal.color(QPalette::Text),
-                                                     QColor(255, 165 ,0))); // Orange
+        textFormat.setForeground(Internal::mixColors(
+                                     pal.color(QPalette::Text),
+                                     QColor(255, 165 ,0))); // Orange
         textFormat.setFontWeight(QFont::Bold);
         break;
     case LogWidget::ErrorLog:
-        textFormat.setForeground(Internal::mixColors(pal.color(QPalette::Text), QColor(Qt::red)));
+        textFormat.setForeground(Internal::mixColors(
+                                     pal.color(QPalette::Text),
+                                     QColor(Qt::red)));
         textFormat.setFontWeight(QFont::Bold);
         break;
     }
 
     QScrollBar* logTextEditVertScrollBar = m_ui->textEdit->verticalScrollBar();
-    const bool atBottom = logTextEditVertScrollBar->value() == logTextEditVertScrollBar->maximum();
+    const bool atBottom =
+            logTextEditVertScrollBar->value()
+            == logTextEditVertScrollBar->maximum();
     QTextCursor cursor = QTextCursor(m_ui->textEdit->document());
     cursor.movePosition(QTextCursor::End);
     cursor.beginEditBlock();
     //: %1 current time of log message    %2 log message
-    cursor.insertText(tr("%1: %2").arg(Internal::currentTimeLogText(), msg) + QLatin1Char('\n'),
-                      textFormat);
+    cursor.insertText(
+                tr("%1: %2").arg(Internal::currentTimeLogText(), msg)
+                + QLatin1Char('\n'),
+                textFormat);
     cursor.endEditBlock();
 
     if (atBottom) {

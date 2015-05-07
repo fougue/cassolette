@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef LOG_WIDGET_H
-#define LOG_WIDGET_H
+#pragma once
 
 #include <QtWidgets/QWidget>
 
@@ -64,5 +63,3 @@ public:
 private:
     class Ui_LogWidget *m_ui;
 };
-
-#endif // LOG_WIDGET_H

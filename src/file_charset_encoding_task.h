@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef FILE_CHARSET_ENCODING_TASK_H
-#define FILE_CHARSET_ENCODING_TASK_H
+#pragma once
 
 #include "base_file_task.h"
 #include <QtCore/QHash>
@@ -77,5 +76,3 @@ private:
     QHash<QByteArray, QTextCodec*> m_codecCache;
     QTextCodec* m_targetCodec;
 };
-
-#endif // FILE_CHARSET_ENCODING_TASK_H

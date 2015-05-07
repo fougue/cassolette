@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef BASE_FILE_TASK_H
-#define BASE_FILE_TASK_H
+#pragma once
 
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
@@ -57,8 +56,10 @@ public:
         bool hasError() const;
 
         static ResultItem createPayload(const QString& pFilePath);
-        static ResultItem createPayload(const QString& pFilePath, const QVariant& pPayload);
-        static ResultItem createError(const QString& pFilePath, const QString& pErrorText);
+        static ResultItem createPayload(
+                const QString& pFilePath, const QVariant& pPayload);
+        static ResultItem createError(
+                const QString& pFilePath, const QString& pErrorText);
     };
 
     BaseFileTask(QObject* parent = nullptr);
@@ -99,5 +100,3 @@ private:
     int m_inputSize;
     bool m_abortRequested;
 };
-
-#endif // BASE_FILE_TASK_H

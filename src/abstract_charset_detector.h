@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef ABSTRACT_CHARSET_DETECTOR_H
-#define ABSTRACT_CHARSET_DETECTOR_H
+#pragma once
 
 #include <cstdint>
 #include <QtCore/QString>
@@ -57,8 +56,7 @@ public:
     virtual QByteArray detectedEncodingName() const = 0;
 
     virtual void init() = 0;
-    virtual bool handleData(const QByteArray& buffer, Error* error = nullptr) = 0;
+    virtual bool handleData(
+            const QByteArray& buffer, Error* error = nullptr) = 0;
     virtual void dataEnd() = 0;
 };
-
-#endif // ABSTRACT_CHARSET_DETECTOR_H

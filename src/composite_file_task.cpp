@@ -42,7 +42,8 @@ void CompositeFileTaskBridge_QStringList::reset()
     this->secondTaskInputPtr()->clear();
 }
 
-void CompositeFileTaskBridge_QStringList::onFirstTaskResultItem(const BaseFileTask::ResultItem &resultItem)
+void CompositeFileTaskBridge_QStringList::onFirstTaskResultItem(
+        const BaseFileTask::ResultItem &resultItem)
 {
     this->secondTaskInputPtr()->append(resultItem.payload.toString());
 }

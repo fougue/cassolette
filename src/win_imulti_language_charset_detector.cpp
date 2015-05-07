@@ -53,7 +53,8 @@
 
 namespace Internal {
 
-static bool confidenceLessThan(const DetectEncodingInfo& lhs, const DetectEncodingInfo& rhs)
+static bool confidenceLessThan(
+        const DetectEncodingInfo& lhs, const DetectEncodingInfo& rhs)
 {
     return lhs.nConfidence < rhs.nConfidence;
 }
@@ -70,8 +71,8 @@ static QString hresultToQString(HRESULT hres)
 
 static AbstractCharsetDetector::Error toDetectionError(HRESULT error)
 {
-    return AbstractCharsetDetector::Error(static_cast<int64_t>(error),
-                                          hresultToQString(error));
+    return AbstractCharsetDetector::Error(
+                static_cast<int64_t>(error), hresultToQString(error));
 }
 
 } // namespace Internal
@@ -82,11 +83,12 @@ WinIMultiLanguageCharsetDetector::WinIMultiLanguageCharsetDetector()
 #ifdef Q_OS_WIN
     // Note that CoCreateInstance() requires ole32.lib
     CoInitialize(nullptr);
-    const HRESULT createInstError = CoCreateInstance(CLSID_CMultiLanguage,
-                                                     nullptr,
-                                                     CLSCTX_INPROC_SERVER,
-                                                     IID_IMultiLanguage2,
-                                                     (void**)&m_multiLang);
+    const HRESULT createInstError = CoCreateInstance(
+                CLSID_CMultiLanguage,
+                nullptr,
+                CLSCTX_INPROC_SERVER,
+                IID_IMultiLanguage2,
+                reinterpret_cast<void**>(&m_multiLang));
     m_constructError = Internal::toDetectionError(createInstError);
 #endif // Q_OS_WIN
 }
@@ -108,38 +110,44 @@ void WinIMultiLanguageCharsetDetector::init()
     m_detectedEncodingName.clear();
 }
 
-bool WinIMultiLanguageCharsetDetector::handleData(const QByteArray &buffer, Error *error)
+bool WinIMultiLanguageCharsetDetector::handleData(
+        const QByteArray &buffer, Error *error)
 {
 #ifdef Q_OS_WIN
     if (m_multiLang != nullptr) {
-        IStream* streamBuffer = SHCreateMemStream(reinterpret_cast<const BYTE*>(buffer.constData()),
-                                                  buffer.size());
+        IStream* streamBuffer = SHCreateMemStream(
+                    reinterpret_cast<const BYTE*>(buffer.constData()), buffer.size());
         if (streamBuffer != nullptr) {
             DetectEncodingInfo encodingInfoArray[8];
-            int encodingInfoCount = static_cast<int>(cpp::cArraySize(encodingInfoArray));
+            int encodingInfoCount =
+                    static_cast<int>(cpp::cArraySize(encodingInfoArray));
 
-            const HRESULT detectError =
-                    m_multiLang->DetectCodepageInIStream(MLDETECTCP_NONE,
-                                                         0,
-                                                         streamBuffer,
-                                                         encodingInfoArray,
-                                                         &encodingInfoCount);
+            const HRESULT detectError = m_multiLang->DetectCodepageInIStream(
+                        MLDETECTCP_NONE,
+                        0,
+                        streamBuffer,
+                        encodingInfoArray,
+                        &encodingInfoCount);
             cpp::checkedAssign(error, Internal::toDetectionError(detectError));
             streamBuffer->Release();
             if (detectError == S_OK) {
                 // Find best confident encoding
                 const auto encodingInfoArrayEnd = encodingInfoArray + encodingInfoCount;
-                auto iBestEncInfo = std::max_element(encodingInfoArray,
-                                                     encodingInfoArrayEnd,
-                                                     &Internal::confidenceLessThan);
+                auto iBestEncInfo = std::max_element(
+                            encodingInfoArray,
+                            encodingInfoArrayEnd,
+                            &Internal::confidenceLessThan);
                 if (iBestEncInfo != encodingInfoArrayEnd) {
                     MIMECPINFO cpInfo;
-                    const HRESULT getCpInfoError = m_multiLang->GetCodePageInfo((*iBestEncInfo).nCodePage,
-                                                                                (*iBestEncInfo).nLangID,
-                                                                                &cpInfo);
-                    cpp::checkedAssign(error, Internal::toDetectionError(getCpInfoError));
+                    const HRESULT getCpInfoError = m_multiLang->GetCodePageInfo(
+                                (*iBestEncInfo).nCodePage,
+                                (*iBestEncInfo).nLangID,
+                                &cpInfo);
+                    cpp::checkedAssign(
+                                error, Internal::toDetectionError(getCpInfoError));
                     if (getCpInfoError == S_OK) {
-                        m_detectedEncodingName = QString::fromWCharArray(cpInfo.wszWebCharset).toUtf8();
+                        m_detectedEncodingName =
+                                QString::fromWCharArray(cpInfo.wszWebCharset).toUtf8();
 //                        m_detectedEncodingName =
 //                                QString("%1(%2%)")
 //                                .arg(QString(m_detectedEncodingName))

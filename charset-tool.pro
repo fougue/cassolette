@@ -5,19 +5,18 @@ CONFIG += c++11
 
 TARGET = charset-tool
 CONFIG(debug, debug|release) {
-  TARGET = $$join(TARGET, , , _d)
+    TARGET = $$join(TARGET, , , _d)
 } else {
-  CONFIG -= console
+    CONFIG -= console
 }
 
 contains(QT_ARCH, i386) {
-  APP_TARGET_ARCH = x86_32
+    APP_TARGET_ARCH = x86_32
 } else {
-  APP_TARGET_ARCH = $$QT_ARCH
+    APP_TARGET_ARCH = $$QT_ARCH
 }
 
-INCLUDEPATH += src \
-               src/3rdparty
+INCLUDEPATH += src src/3rdparty
 
 HEADERS += \
     src/charset_tool_main_window.h \
@@ -59,14 +58,14 @@ FORMS += \
 RESOURCES += charset-tool.qrc
 
 win32 {
-  QMAKE_SUBSTITUTES += env_win.bat.in
-
-  LIBS += -lole32 -lShlwapi
+    QMAKE_SUBSTITUTES += env_win.bat.in
+    LIBS += -lole32 -lShlwapi
 }
 
-OTHER_FILES += readme.md \
-               deploy/windows/setup.iss \
-               $$QMAKE_SUBSTITUTES
+OTHER_FILES += \
+    readme.md \
+    deploy/windows/setup.iss \
+    $$QMAKE_SUBSTITUTES
 
 
 # Mozilla Universal Character Set Detector library

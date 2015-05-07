@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef COMPOSITE_FILE_TASK_H
-#define COMPOSITE_FILE_TASK_H
+#pragma once
 
 #include "base_file_task.h"
 #include <QtCore/QStringList>
@@ -76,9 +75,10 @@ private:
 //! \brief Utility function to ease creation of a CompositeFileTask<>
 //! \relates CompositeFileTask
 template<typename FIRST_TASK, typename SECOND_TASK>
-BaseFileTask* newCompositeFileTask(FIRST_TASK* task1,
-                                   SECOND_TASK* task2,
-                                   CompositeFileTaskBridge<typename SECOND_TASK::InputType>* bridge = nullptr)
+BaseFileTask* newCompositeFileTask(
+        FIRST_TASK* task1,
+        SECOND_TASK* task2,
+        CompositeFileTaskBridge<typename SECOND_TASK::InputType>* bridge = nullptr)
 {
     auto* task = new CompositeFileTask<FIRST_TASK, SECOND_TASK>(task1, task2);
     task->setTaskBridge(bridge);
@@ -86,7 +86,8 @@ BaseFileTask* newCompositeFileTask(FIRST_TASK* task1,
 }
 
 
-//! \brief Adapts CompositeFileTask first task output to be reinjected as second task input
+//! Adapts CompositeFileTask first task output to be reinjected as second task
+//! input
 template<typename SECOND_TASK_INPUT>
 class CompositeFileTaskBridge
 {
@@ -104,8 +105,9 @@ private:
     SECOND_TASK_INPUT m_secondTaskInput;
 };
 
-//! \brief Default CompositeFileTaskBridge for task input being of type "QStringList"
-class CompositeFileTaskBridge_QStringList : public CompositeFileTaskBridge<QStringList>
+//! Default CompositeFileTaskBridge for task input being of type "QStringList"
+class CompositeFileTaskBridge_QStringList
+        : public CompositeFileTaskBridge<QStringList>
 {
 public:
     void reset();
@@ -119,7 +121,8 @@ public:
 
 // CompositeFileTask<>
 template<typename FIRST_TASK, typename SECOND_TASK>
-CompositeFileTask<FIRST_TASK, SECOND_TASK>::CompositeFileTask(FIRST_TASK* task1, SECOND_TASK* task2)
+CompositeFileTask<FIRST_TASK, SECOND_TASK>::CompositeFileTask(
+        FIRST_TASK* task1, SECOND_TASK* task2)
     : m_firstTask(task1),
       m_secondTask(task2),
       m_bridge(nullptr)
@@ -180,7 +183,8 @@ bool CompositeFileTask<FIRST_TASK, SECOND_TASK>::isRunning() const
 }
 
 template<typename FIRST_TASK, typename SECOND_TASK>
-void CompositeFileTask<FIRST_TASK, SECOND_TASK>::onFirstTaskResultItem(const BaseFileTask::ResultItem& resultItem)
+void CompositeFileTask<FIRST_TASK, SECOND_TASK>::onFirstTaskResultItem(
+        const BaseFileTask::ResultItem& resultItem)
 {
     if (!resultItem.hasError()) {
         if (m_bridge != nullptr)
@@ -219,7 +223,8 @@ void CompositeFileTaskBridge<SECOND_TASK_INPUT>::reset()
 { }
 
 template<typename SECOND_TASK_INPUT>
-void CompositeFileTaskBridge<SECOND_TASK_INPUT>::onFirstTaskResultItem(const BaseFileTask::ResultItem&)
+void CompositeFileTaskBridge<SECOND_TASK_INPUT>::onFirstTaskResultItem(
+        const BaseFileTask::ResultItem&)
 { }
 
 template<typename SECOND_TASK_INPUT>
@@ -237,5 +242,3 @@ SECOND_TASK_INPUT* CompositeFileTaskBridge<SECOND_TASK_INPUT>::secondTaskInputPt
 {
     return &m_secondTaskInput;
 }
-
-#endif // COMPOSITE_FILE_TASK_H

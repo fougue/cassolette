@@ -57,16 +57,24 @@ void DirIterationTask::setFilters(const QStringList &filters)
 {
     m_filters = filters;
     m_filterRxVec.clear();
-    foreach (const QString& filter, filters)
-        m_filterRxVec.append(QRegExp(filter.trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
+    foreach (const QString& filter, filters) {
+        m_filterRxVec.append(QRegExp(
+                                 filter.trimmed(),
+                                 Qt::CaseSensitive,
+                                 QRegExp::Wildcard));
+    }
 }
 
 void DirIterationTask::setExcludes(const QStringList &excludes)
 {
     m_excludes = excludes;
     m_excludeRxVec.clear();
-    foreach (const QString& exclude, excludes)
-        m_excludeRxVec.append(QRegExp(exclude.trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
+    foreach (const QString& exclude, excludes) {
+        m_excludeRxVec.append(QRegExp(
+                                  exclude.trimmed(),
+                                  Qt::CaseSensitive,
+                                  QRegExp::Wildcard));
+    }
 }
 
 void DirIterationTask::setInput(const QStringList &fileOrFolderList)
@@ -76,7 +84,7 @@ void DirIterationTask::setInput(const QStringList &fileOrFolderList)
 
 void DirIterationTask::asyncExec()
 {
-    m_futureWatcher->setFuture(QtConcurrent::run(std::bind(&DirIterationTask::iterate, this)));
+    m_futureWatcher->setFuture(QtConcurrent::run([=] { this->iterate(); }));
 }
 
 bool DirIterationTask::isRunning() const
@@ -94,7 +102,9 @@ void DirIterationTask::iterate()
         const QString inputAbsPath = inputInfo.absoluteFilePath();
         if (inputInfo.exists()) {
             if (inputInfo.isDir()) {
-                QDirIterator dirIt(inputInfo.absoluteFilePath(), QDirIterator::Subdirectories);
+                QDirIterator dirIt(
+                            inputInfo.absoluteFilePath(),
+                            QDirIterator::Subdirectories);
                 while (dirIt.hasNext()) {
                     if (this->abortRequested())
                         return;
@@ -102,17 +112,25 @@ void DirIterationTask::iterate()
                     dirIt.next();
                     const QFileInfo subFileInfo = dirIt.fileInfo();
                     const QString subFileAbsPath = subFileInfo.absoluteFilePath();
-                    if (subFileInfo.isFile() && this->acceptsInputFile(subFileAbsPath))
-                        emit taskResultItem(BaseFileTask::ResultItem::createPayload(subFileAbsPath));
+                    if (subFileInfo.isFile()
+                            && this->acceptsInputFile(subFileAbsPath))
+                    {
+                        emit taskResultItem(
+                                    BaseFileTask::ResultItem::createPayload(subFileAbsPath));
+                    }
                 }
             }
-            else if (inputInfo.isFile() && this->acceptsInputFile(inputAbsPath)) {
-                emit taskResultItem(BaseFileTask::ResultItem::createPayload(inputAbsPath));
+            else if (inputInfo.isFile()
+                     && this->acceptsInputFile(inputAbsPath))
+            {
+                emit taskResultItem(
+                            BaseFileTask::ResultItem::createPayload(inputAbsPath));
             }
         }
         else {
             const QString errorText = tr("'%1' does not exist").arg(inputAbsPath);
-            emit taskResultItem(BaseFileTask::ResultItem::createError(inputAbsPath, errorText));
+            emit taskResultItem(
+                        BaseFileTask::ResultItem::createError(inputAbsPath, errorText));
         }
     } // end foreach
 }

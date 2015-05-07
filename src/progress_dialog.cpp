@@ -52,7 +52,8 @@ ProgressDialog::ProgressDialog(QWidget *parent)
     m_ui->stackedWidget->setCurrentWidget(m_ui->progressPage);
     this->setModal(true);
 
-    QObject::connect(m_ui->buttonBox, &QDialogButtonBox::clicked, this, &ProgressDialog::onClicked);
+    QObject::connect(m_ui->buttonBox, &QDialogButtonBox::clicked,
+                     this, &ProgressDialog::onClicked);
 }
 
 ProgressDialog::~ProgressDialog()

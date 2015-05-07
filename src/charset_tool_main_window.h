@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef CHARSET_TOOL_MAIN_WINDOW_H
-#define CHARSET_TOOL_MAIN_WINDOW_H
+#pragma once
 
 #include "base_file_task.h"
 class FileCharsetDetectionTask;
@@ -110,5 +109,3 @@ private:
     static const int fileItemBatchSize = 128;
     QList<QTreeWidgetItem*> m_fileItemBatch;
 };
-
-#endif // CHARSET_TOOL_MAIN_WINDOW_H

@@ -117,17 +117,22 @@ void BaseFileTask::createFutureWatcher()
 {
     if (m_futureWatcher == nullptr) {
         m_futureWatcher = new QFutureWatcher<ResultItem>(this);
-        QObject::connect(m_futureWatcher, &QFutureWatcher<ResultItem>::started,
-                         this, &BaseFileTask::taskStarted);
-        QObject::connect(m_futureWatcher, &QFutureWatcher<ResultItem>::finished,
-                         this, &BaseFileTask::onFutureFinished);
-        QObject::connect(m_futureWatcher, &QFutureWatcher<ResultItem>::resultReadyAt,
-                         this, &BaseFileTask::onTaskResultReadyAt);
+        QObject::connect(
+                    m_futureWatcher, &QFutureWatcher<ResultItem>::started,
+                    this, &BaseFileTask::taskStarted);
+        QObject::connect(
+                    m_futureWatcher, &QFutureWatcher<ResultItem>::finished,
+                    this, &BaseFileTask::onFutureFinished);
+        QObject::connect(
+                    m_futureWatcher, &QFutureWatcher<ResultItem>::resultReadyAt,
+                    this, &BaseFileTask::onTaskResultReadyAt);
 
-        QObject::connect(m_futureWatcher, &FutureWatcher::progressRangeChanged,
-                         this, &BaseFileTask::taskProgressRangeChanged);
-        QObject::connect(m_futureWatcher, &FutureWatcher::progressValueChanged,
-                         this, &BaseFileTask::taskProgressValueChanged);
+        QObject::connect(
+                    m_futureWatcher, &FutureWatcher::progressRangeChanged,
+                    this, &BaseFileTask::taskProgressRangeChanged);
+        QObject::connect(
+                    m_futureWatcher, &FutureWatcher::progressValueChanged,
+                    this, &BaseFileTask::taskProgressValueChanged);
     }
 }
 
@@ -142,7 +147,8 @@ bool BaseFileTask::ResultItem::hasError() const
     return !errorText.isEmpty();
 }
 
-BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(const QString &pFilePath)
+BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(
+        const QString &pFilePath)
 {
     BaseFileTask::ResultItem item;
     item.filePath = pFilePath;
@@ -150,8 +156,8 @@ BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(const QString &
     return item;
 }
 
-BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(const QString &pFilePath,
-                                                                 const QVariant &pPayload)
+BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(
+        const QString &pFilePath, const QVariant &pPayload)
 {
     BaseFileTask::ResultItem item;
     item.filePath = pFilePath;
@@ -159,8 +165,8 @@ BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(const QString &
     return item;
 }
 
-BaseFileTask::ResultItem BaseFileTask::ResultItem::createError(const QString &pFilePath,
-                                                               const QString &pErrorText)
+BaseFileTask::ResultItem BaseFileTask::ResultItem::createError(
+        const QString &pFilePath, const QString &pErrorText)
 {
     BaseFileTask::ResultItem item;
     item.filePath = pFilePath;

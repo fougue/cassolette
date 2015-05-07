@@ -42,7 +42,7 @@
 EditableListWidget::EditableListWidget(QWidget *parent)
     : QListWidget(parent)
 {
-    qttools::ItemViewButtons* itemBtns = new qttools::ItemViewButtons(this, this);
+    auto itemBtns = new qttools::ItemViewButtons(this, this);
 
     QIcon removeIcon;
     removeIcon.addPixmap(QPixmap(":/images/list-remove.png"), QIcon::Normal);
@@ -53,8 +53,9 @@ EditableListWidget::EditableListWidget(QWidget *parent)
     itemBtns->setButtonIcon(0, removeIcon);
     itemBtns->setButtonToolTip(0, tr("Delete item"));
     itemBtns->setButtonDetection(0, -1, QVariant());
-    QObject::connect(itemBtns, &qttools::ItemViewButtons::buttonClicked,
-                     this, &EditableListWidget::onItemButtonClicked);
+    QObject::connect(
+                itemBtns, &qttools::ItemViewButtons::buttonClicked,
+                this, &EditableListWidget::onItemButtonClicked);
 }
 
 void EditableListWidget::onItemButtonClicked(int btnId, const QModelIndex &index)

@@ -63,19 +63,20 @@ void FileCharsetDetectionTask::setInput(const QStringList &filePathList)
 
 void FileCharsetDetectionTask::asyncExec()
 {
-    auto future = QtConcurrent::mapped(m_filePathList,
-                                       std::bind(&FileCharsetDetectionTask::detectFile,
-                                                 this,
-                                                 std::placeholders::_1));
+    const std::function<ResultItem (const QString&)> func =
+            [=](const QString& fpath) { return this->detectFile(fpath); };
+    auto future = QtConcurrent::mapped(m_filePathList, func);
     this->futureWatcher()->setFuture(future);
 }
 
-BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(const QString &filePath)
+BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(
+        const QString &filePath)
 {
     BaseFileTask::ResultItem result;
 
     if (!m_detectorByThread.hasLocalData()) {
-        m_detectorByThread.setLocalData(new MozillaUniversalCharsetDetector(NS_FILTER_ALL));
+        m_detectorByThread.setLocalData(
+                    new MozillaUniversalCharsetDetector(NS_FILTER_ALL));
         //m_detectorByThread.setLocalData(new WinIMultiLanguageCharsetDetector);
     }
     AbstractCharsetDetector* formatDetector = m_detectorByThread.localData();
@@ -89,7 +90,8 @@ BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(const QString &fil
             formatDetector->init();
 
             AbstractCharsetDetector::Error detectError;
-            const bool handleSuccess = formatDetector->handleData(fileContents, &detectError);
+            const bool handleSuccess =
+                    formatDetector->handleData(fileContents, &detectError);
             formatDetector->dataEnd();
 
             if (handleSuccess) {
@@ -101,8 +103,9 @@ BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(const QString &fil
             }
         }
         else {
-            result.errorText = !file.errorString().isEmpty() ? file.errorString() :
-                                                               tr("Unknonw error");
+            result.errorText =
+                    !file.errorString().isEmpty() ?
+                        file.errorString() : tr("Unknonw error");
         }
     }
     else {

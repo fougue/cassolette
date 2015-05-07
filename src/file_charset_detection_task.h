@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef FILE_CHARSET_DETECTION_TASK_H
-#define FILE_CHARSET_DETECTION_TASK_H
+#pragma once
 
 #include "base_file_task.h"
 
@@ -67,5 +66,3 @@ private:
     QStringList m_filePathList;
     QThreadStorage<AbstractCharsetDetector*> m_detectorByThread;
 };
-
-#endif // FILE_CHARSET_DETECTION_TASK_H

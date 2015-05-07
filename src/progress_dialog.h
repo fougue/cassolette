@@ -35,17 +35,17 @@
 **
 ****************************************************************************/
 
-#ifndef PROGRESS_DIALOG_H
-#define PROGRESS_DIALOG_H
+#pragma once
 
 #include <QtWidgets/QDialog>
 class QAbstractButton;
 
-/*! \brief Similar to QProgressDialog
+/*! Similar to QProgressDialog
  *
- *  It is lighter than QProgressDialog that comes with an internal QTimer, app processing, ...
- *  But the main reason QProgressDialog is not used are the frequent crashs with Windows, even
- *  with recent Qt.
+ *  It is lighter than QProgressDialog that comes with an internal QTimer, app
+ *  processing, ...
+ *  But the main reason QProgressDialog is not used are the frequent crashs with
+ *  Windows, even with recent Qt.
  */
 class ProgressDialog : public QDialog
 {
@@ -69,19 +69,15 @@ public:
 
     bool wasCanceled() const;
 
-public slots:
     void reset();
     void resetCancelFlag();
 
 signals:
     void canceled();
 
-private slots:
+private:
     void onClicked(QAbstractButton* btn);
 
-private:
     class Ui_ProgressDialog *m_ui;
     bool m_wasCanceled;
 };
-
-#endif // PROGRESS_DIALOG_H

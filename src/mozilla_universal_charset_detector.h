@@ -35,23 +35,22 @@
 **
 ****************************************************************************/
 
-#ifndef MOZILLA_UNIVERSAL_CHARSET_DETECTOR_H
-#define MOZILLA_UNIVERSAL_CHARSET_DETECTOR_H
+#pragma once
 
 #include "abstract_charset_detector.h"
 
 #include <ucsd/nscore.h>
 #include <ucsd/nsUniversalDetector.h>
 
-/*! \brief Charset detector based on Mozilla's Universal CharSet Detector(UCSD) library
+/*! Charset detector based on Mozilla's Universal CharSet Detector(UCSD) library
  *
- *  Class nsUniversalDetector has to be redefined because nsUniversalDetector::Report() is pure
- *  virtual (see http://www-archive.mozilla.org/projects/intl/detectorsrc.html  Step 2, Write a
- *  wrapper class)
+ *  Class nsUniversalDetector has to be redefined because
+ *  nsUniversalDetector::Report() is pure virtual
+ *  (see http://www-archive.mozilla.org/projects/intl/detectorsrc.html
+ *   Step 2, Write a wrapper class)
  */
 class MozillaUniversalCharsetDetector :
-        public AbstractCharsetDetector,
-        protected nsUniversalDetector
+        public AbstractCharsetDetector, protected nsUniversalDetector
 {
 public:
     MozillaUniversalCharsetDetector(PRUint32 langFilter);
@@ -69,5 +68,3 @@ protected:
 private:
     QByteArray m_detectedEncodingName;
 };
-
-#endif // MOZILLA_UNIVERSAL_CHARSET_DETECTOR_H

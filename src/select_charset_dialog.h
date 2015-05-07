@@ -35,8 +35,7 @@
 **
 ****************************************************************************/
 
-#ifndef SELECT_CHARSET_DIALOG_H
-#define SELECT_CHARSET_DIALOG_H
+#pragma once
 
 #include <QtWidgets/QDialog>
 class QSortFilterProxyModel;
@@ -53,12 +52,9 @@ public:
 
     void accept() override;
 
-private slots:
+private:
     void onFilterChanged(const QString& filter);
 
-private:
     class Ui_SelectCharsetDialog *m_ui;
     QSortFilterProxyModel* m_filterCodecModel;
 };
-
-#endif // SELECT_CHARSET_DIALOG_H
