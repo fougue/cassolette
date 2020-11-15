@@ -29,8 +29,7 @@ FileCharsetEncodingTask::FileCharsetEncodingTask(QObject *parent)
 
 QByteArray FileCharsetEncodingTask::targetCharset() const
 {
-    return m_targetCodec != nullptr ?
-                m_targetCodec->name() : QByteArray();
+    return m_targetCodec != nullptr ? m_targetCodec->name() : QByteArray();
 }
 
 void FileCharsetEncodingTask::setTargetCharset(const QByteArray &charset)
@@ -38,8 +37,7 @@ void FileCharsetEncodingTask::setTargetCharset(const QByteArray &charset)
     m_targetCodec = QTextCodec::codecForName(charset);
 }
 
-void FileCharsetEncodingTask::setInput(
-        const QVector<FileCharsetEncodingTask::InputFile> &fileVec)
+void FileCharsetEncodingTask::setInput(const QVector<FileCharsetEncodingTask::InputFile> &fileVec)
 {
     m_inputFileVec = fileVec;
     this->setInputSize(fileVec.size());
@@ -50,11 +48,8 @@ void FileCharsetEncodingTask::asyncExec()
     if (m_targetCodec != nullptr) {
         for (const auto& inputFile : m_inputFileVec) {
             const QByteArray& inputCharset = inputFile.charset;
-            if (!m_codecCache.contains(inputCharset)) {
-                m_codecCache.insert(
-                            inputCharset,
-                            QTextCodec::codecForName(inputCharset));
-            }
+            if (!m_codecCache.contains(inputCharset))
+                m_codecCache.insert(inputCharset, QTextCodec::codecForName(inputCharset));
         }
 
         const std::function<ResultItem (const InputFile&)> func =
@@ -85,26 +80,20 @@ BaseFileTask::ResultItem FileCharsetEncodingTask::encodeFile(
 
             bool writeSuccess = false;
             if (file.open(QIODevice::WriteOnly)) {
-                const QByteArray encodedContents =
-                        m_targetCodec->fromUnicode(fileUnicodeContents);
+                const QByteArray encodedContents = m_targetCodec->fromUnicode(fileUnicodeContents);
                 if (file.write(encodedContents) != -1)
                     writeSuccess = true;
             }
-            if (!writeSuccess) {
-                result.errorText =
-                        tr("Failed to write contents (%1)")
-                        .arg(file.errorString());
-            }
+
+            if (!writeSuccess)
+                result.errorText = tr("Failed to write contents (%1)").arg(file.errorString());
         }
         else {
-            result.errorText =
-                    tr("Failed to read file (%1)").arg(file.errorString());
+            result.errorText = tr("Failed to read file (%1)").arg(file.errorString());
         }
     }
     else {
-        result.errorText =
-                tr("Null text encoder for %1")
-                .arg(QString::fromUtf8(inputFile.charset));
+        result.errorText = tr("Null text encoder for %1").arg(QString::fromUtf8(inputFile.charset));
     }
 
     return result;
@@ -115,8 +104,7 @@ FileCharsetEncodingTask::InputFile::InputFile()
 {
 }
 
-FileCharsetEncodingTask::InputFile::InputFile(
-        const QString &pFilePath, const QByteArray &pCharset)
+FileCharsetEncodingTask::InputFile::InputFile(const QString &pFilePath, const QByteArray &pCharset)
     : filePath(pFilePath),
       charset(pCharset)
 {

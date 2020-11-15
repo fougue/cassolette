@@ -46,11 +46,9 @@ void MozillaUniversalCharsetDetector::init()
     this->Reset();
 }
 
-bool MozillaUniversalCharsetDetector::handleData(
-        const QByteArray &buffer, Error *error)
+bool MozillaUniversalCharsetDetector::handleData(const QByteArray &buffer, Error *error)
 {
-    const nsresult res = nsUniversalDetector::HandleData(
-                buffer.constData(), buffer.size());
+    const nsresult res = nsUniversalDetector::HandleData(buffer.constData(), buffer.size());
     cpp::checkedAssign(error, Internal::toDetectionError(res));
     return res == NS_OK;
 }

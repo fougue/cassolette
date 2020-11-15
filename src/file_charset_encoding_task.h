@@ -24,13 +24,11 @@ class QTextCodec;
  *
  *  BaseFileTask::ResultItem::payload contains the target character set
  */
-class FileCharsetEncodingTask : public BaseFileTask
-{
+class FileCharsetEncodingTask : public BaseFileTask {
     Q_OBJECT
 
 public:
-    struct InputFile
-    {
+    struct InputFile {
         InputFile();
         InputFile(const QString& pFilePath, const QByteArray& pCharset);
         QString filePath;

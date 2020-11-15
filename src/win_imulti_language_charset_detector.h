@@ -18,8 +18,7 @@
 #include "abstract_charset_detector.h"
 struct IMultiLanguage2;
 
-class WinIMultiLanguageCharsetDetector : public AbstractCharsetDetector
-{
+class WinIMultiLanguageCharsetDetector : public AbstractCharsetDetector {
 public:
     WinIMultiLanguageCharsetDetector();
     ~WinIMultiLanguageCharsetDetector();

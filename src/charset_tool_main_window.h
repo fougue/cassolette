@@ -25,8 +25,7 @@ class ProgressDialog;
 #include <QtWidgets/QMainWindow>
 class QTreeWidgetItem;
 
-class CharsetToolMainWindow : public QMainWindow
-{
+class CharsetToolMainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -52,8 +51,7 @@ private:
     void handleAnalyseResultItem(const BaseFileTask::ResultItem& resultItem);
     void handleConversionResultItem(const BaseFileTask::ResultItem& resultItem);
 
-    enum TaskId
-    {
+    enum TaskId {
         NoTask,
         AnalyseTask,
         ConversionTask

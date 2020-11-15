@@ -27,8 +27,7 @@
 
 namespace Internal {
 
-static const char SelectCharsetDialog_lastCodecNameIniKey[] =
-        "SelectCharsetDialog_lastCodecName";
+static const char SelectCharsetDialog_lastCodecNameIniKey[] = "SelectCharsetDialog_lastCodecName";
 static const int  SelectCharsetDialog_codecDataRole = Qt::UserRole + 1;
 
 } // namespace Internal
@@ -72,10 +71,8 @@ SelectCharsetDialog::SelectCharsetDialog(QWidget *parent)
         }
 
         // Create list item for codec
-        auto codecItem =
-                new QStandardItem(codecAliasList.join(QLatin1String(" / ")));
-        codecItem->setData(
-                    codecName, Internal::SelectCharsetDialog_codecDataRole);
+        auto codecItem = new QStandardItem(codecAliasList.join(QLatin1String(" / ")));
+        codecItem->setData(codecName, Internal::SelectCharsetDialog_codecDataRole);
         codecModel->appendRow(codecItem);
         codecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         if (codecName == iniLastCodecName)
@@ -105,10 +102,9 @@ QByteArray SelectCharsetDialog::selectedCharset() const
     const QModelIndex codecIndex =
             selectedCodecIndexes.size() == 1 ?
                 selectedCodecIndexes.first() : QModelIndex();
-    if (codecIndex.isValid()) {
-        return codecIndex.data(Internal::SelectCharsetDialog_codecDataRole)
-                .toByteArray();
-    }
+    if (codecIndex.isValid())
+        return codecIndex.data(Internal::SelectCharsetDialog_codecDataRole).toByteArray();
+
     return QByteArray();
 }
 
@@ -117,14 +113,11 @@ void SelectCharsetDialog::accept()
     const QByteArray currentCharset = this->selectedCharset();
     if (!currentCharset.isEmpty()) {
         QSettings appSettings;
-        appSettings.setValue(
-                    Internal::SelectCharsetDialog_lastCodecNameIniKey,
-                    currentCharset);
+        appSettings.setValue(Internal::SelectCharsetDialog_lastCodecNameIniKey, currentCharset);
         QDialog::accept();
     }
     else {
-        QMessageBox::information(
-                    this, tr("Error"), tr("No character set selected"));
+        QMessageBox::information(this, tr("Error"), tr("No character set selected"));
     }
 }
 

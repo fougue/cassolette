@@ -19,25 +19,21 @@
 #include <QtCore/QVariant>
 template<typename T> class QFutureWatcher;
 
-class BaseFileTask : public QObject
-{
+class BaseFileTask : public QObject {
     Q_OBJECT
 
 public:
     typedef void InputType;
 
-    struct ResultItem
-    {
+    struct ResultItem {
         QString  filePath;
         QVariant payload;
         QString  errorText;
         bool hasError() const;
 
         static ResultItem createPayload(const QString& pFilePath);
-        static ResultItem createPayload(
-                const QString& pFilePath, const QVariant& pPayload);
-        static ResultItem createError(
-                const QString& pFilePath, const QString& pErrorText);
+        static ResultItem createPayload(const QString& pFilePath, const QVariant& pPayload);
+        static ResultItem createError(const QString& pFilePath, const QString& pErrorText);
     };
 
     BaseFileTask(QObject* parent = nullptr);

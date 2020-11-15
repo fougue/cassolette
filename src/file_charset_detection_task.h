@@ -26,8 +26,7 @@ class AbstractCharsetDetector;
  *
  *  BaseFileTask::ResultItem::payload contains the detected character set
  */
-class FileCharsetDetectionTask : public BaseFileTask
-{
+class FileCharsetDetectionTask : public BaseFileTask {
     Q_OBJECT
 
 public:

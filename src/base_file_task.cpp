@@ -57,8 +57,7 @@ void BaseFileTask::abortTask()
 
 bool BaseFileTask::isRunning() const
 {
-    return m_futureWatcher != nullptr ? m_futureWatcher->isRunning() :
-                                        false;
+    return m_futureWatcher != nullptr ? m_futureWatcher->isRunning() : false;
 }
 
 void BaseFileTask::onTaskResultReadyAt(int resultId)
@@ -114,7 +113,7 @@ void BaseFileTask::createFutureWatcher()
     }
 }
 
-QFutureWatcher<BaseFileTask::ResultItem> *BaseFileTask::futureWatcher() const
+QFutureWatcher<BaseFileTask::ResultItem>* BaseFileTask::futureWatcher() const
 {
     return m_futureWatcher;
 }
@@ -125,8 +124,7 @@ bool BaseFileTask::ResultItem::hasError() const
     return !errorText.isEmpty();
 }
 
-BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(
-        const QString &pFilePath)
+BaseFileTask::ResultItem BaseFileTask::ResultItem::createPayload(const QString &pFilePath)
 {
     BaseFileTask::ResultItem item;
     item.filePath = pFilePath;

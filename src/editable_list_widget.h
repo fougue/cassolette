@@ -17,8 +17,7 @@
 
 #include <QtWidgets/QListWidget>
 
-class EditableListWidget : public QListWidget
-{
+class EditableListWidget : public QListWidget {
     Q_OBJECT
 
 public:

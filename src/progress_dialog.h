@@ -25,8 +25,7 @@ class QAbstractButton;
  *  But the main reason QProgressDialog is not used are the frequent crashs with
  *  Windows, even with recent Qt.
  */
-class ProgressDialog : public QDialog
-{
+class ProgressDialog : public QDialog {
     Q_OBJECT
 
 public:

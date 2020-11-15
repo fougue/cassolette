@@ -18,8 +18,7 @@
 #include <QtWidgets/QDialog>
 class QSortFilterProxyModel;
 
-class SelectCharsetDialog : public QDialog
-{
+class SelectCharsetDialog : public QDialog {
     Q_OBJECT
 
 public:

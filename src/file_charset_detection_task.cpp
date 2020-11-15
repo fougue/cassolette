@@ -47,14 +47,12 @@ void FileCharsetDetectionTask::asyncExec()
     this->futureWatcher()->setFuture(future);
 }
 
-BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(
-        const QString &filePath)
+BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(const QString &filePath)
 {
     BaseFileTask::ResultItem result;
 
     if (!m_detectorByThread.hasLocalData()) {
-        m_detectorByThread.setLocalData(
-                    new MozillaUniversalCharsetDetector(NS_FILTER_ALL));
+        m_detectorByThread.setLocalData(new MozillaUniversalCharsetDetector(NS_FILTER_ALL));
         //m_detectorByThread.setLocalData(new WinIMultiLanguageCharsetDetector);
     }
     AbstractCharsetDetector* formatDetector = m_detectorByThread.localData();
@@ -68,8 +66,7 @@ BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(
             formatDetector->init();
 
             AbstractCharsetDetector::Error detectError;
-            const bool handleSuccess =
-                    formatDetector->handleData(fileContents, &detectError);
+            const bool handleSuccess = formatDetector->handleData(fileContents, &detectError);
             formatDetector->dataEnd();
 
             if (handleSuccess) {
@@ -81,9 +78,7 @@ BaseFileTask::ResultItem FileCharsetDetectionTask::detectFile(
             }
         }
         else {
-            result.errorText =
-                    !file.errorString().isEmpty() ?
-                        file.errorString() : tr("Unknonw error");
+            result.errorText = !file.errorString().isEmpty() ? file.errorString() : tr("Unknonw error");
         }
     }
     else {

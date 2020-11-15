@@ -28,8 +28,7 @@ class QFileInfo;
  *  \note DirIterationTask does not set BaseFileTask::inputSize() so task
  *        progress cannot be computed
  */
-class DirIterationTask : public BaseFileTask
-{
+class DirIterationTask : public BaseFileTask {
     Q_OBJECT
 
 public:

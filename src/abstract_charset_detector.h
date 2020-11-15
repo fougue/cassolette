@@ -18,11 +18,9 @@
 #include <cstdint>
 #include <QtCore/QString>
 
-class AbstractCharsetDetector
-{
+class AbstractCharsetDetector {
 public:
-    struct Error
-    {
+    struct Error {
         Error();
         Error(int64_t pCode, const QString& msg = QString());
         int64_t code;
@@ -34,7 +32,6 @@ public:
     virtual QByteArray detectedEncodingName() const = 0;
 
     virtual void init() = 0;
-    virtual bool handleData(
-            const QByteArray& buffer, Error* error = nullptr) = 0;
+    virtual bool handleData(const QByteArray& buffer, Error* error = nullptr) = 0;
     virtual void dataEnd() = 0;
 };

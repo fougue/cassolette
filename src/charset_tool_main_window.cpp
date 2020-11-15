@@ -154,8 +154,7 @@ void CharsetToolMainWindow::runConversion()
     }
 }
 
-void CharsetToolMainWindow::onTaskResultItem(
-        const BaseFileTask::ResultItem &resultItem)
+void CharsetToolMainWindow::onTaskResultItem(const BaseFileTask::ResultItem& resultItem)
 {
     if (!resultItem.hasError()) {
         switch (m_currentTaskId) {
@@ -184,8 +183,7 @@ void CharsetToolMainWindow::onFileListingStarted()
 void CharsetToolMainWindow::onDetectionStarted()
 {
     const int fileCount = m_csDetector->inputSize();
-    this->createTaskProgressDialog(tr("Analysing %n files", nullptr, fileCount),
-                                   fileCount);
+    this->createTaskProgressDialog(tr("Analysing %n files", nullptr, fileCount), fileCount);
 }
 
 void CharsetToolMainWindow::onConversionStarted()
@@ -197,8 +195,7 @@ void CharsetToolMainWindow::onConversionStarted()
                 fileCount);
 }
 
-void CharsetToolMainWindow::handleTaskError(
-        const QString &inputFile, const QString &errorText)
+void CharsetToolMainWindow::handleTaskError(const QString &inputFile, const QString &errorText)
 {
     m_ui->pageLog->appendLogError(QString("%1 : %2").arg(inputFile, errorText));
 }
@@ -218,10 +215,8 @@ void CharsetToolMainWindow::onTaskFinished()
     // taskFinished() is emitted after taskAborted(), so we check if there is
     // any task running to avoid displaying any superfluous "<Task> ended" log
     // message
-    if (m_currentTaskId != CharsetToolMainWindow::NoTask) {
-        m_ui->pageLog->appendLogInfo(
-                    tr("%1 finished").arg(this->currentTaskName()));
-    }
+    if (m_currentTaskId != CharsetToolMainWindow::NoTask)
+        m_ui->pageLog->appendLogInfo(tr("%1 finished").arg(this->currentTaskName()));
 
     this->onTaskEnded();
 }
@@ -232,8 +227,7 @@ void CharsetToolMainWindow::onProgressDialogCanceled()
         this->currentTask()->abortTask();
 }
 
-void CharsetToolMainWindow::handleAnalyseResultItem(
-        const BaseFileTask::ResultItem &resultItem)
+void CharsetToolMainWindow::handleAnalyseResultItem(const BaseFileTask::ResultItem& resultItem)
 {
     const QString charsetStr = resultItem.payload.toString();
     auto item = new QTreeWidgetItem(QStringList(charsetStr) << resultItem.filePath);
@@ -246,8 +240,7 @@ void CharsetToolMainWindow::handleAnalyseResultItem(
     }
 }
 
-void CharsetToolMainWindow::handleConversionResultItem(
-        const BaseFileTask::ResultItem &resultItem)
+void CharsetToolMainWindow::handleConversionResultItem(const BaseFileTask::ResultItem& resultItem)
 {
     const QString charset = resultItem.payload.toString();
     m_ui->pageLog->appendLogInfo(
@@ -309,8 +302,7 @@ void CharsetToolMainWindow::updateTaskButtons()
                 isIdle && !m_ui->analyseTreeWidget->selectedItems().isEmpty());
 }
 
-void CharsetToolMainWindow::createTaskProgressDialog(
-        const QString &labelText, int fileCount)
+void CharsetToolMainWindow::createTaskProgressDialog(const QString &labelText, int fileCount)
 {
     if (m_taskProgressDialog == nullptr) {
         m_taskProgressDialog = new ProgressDialog(this);
@@ -318,6 +310,7 @@ void CharsetToolMainWindow::createTaskProgressDialog(
                     m_taskProgressDialog, &ProgressDialog::canceled,
                     this, &CharsetToolMainWindow::onProgressDialogCanceled);
     }
+
     m_taskProgressDialog->setLabelText(labelText);
     m_taskProgressDialog->setValue(0);
     m_taskProgressDialog->setMaximumValue(fileCount);

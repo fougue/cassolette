@@ -17,13 +17,11 @@
 
 #include <QtWidgets/QWidget>
 
-class LogWidget : public QWidget
-{
+class LogWidget : public QWidget {
     Q_OBJECT
 
 public:
-    enum LogFormat
-    {
+    enum LogFormat {
         InfoLog,
         WarningLog,
         ErrorLog

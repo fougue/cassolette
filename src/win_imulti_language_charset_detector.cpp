@@ -31,8 +31,7 @@
 
 namespace Internal {
 
-static bool confidenceLessThan(
-        const DetectEncodingInfo& lhs, const DetectEncodingInfo& rhs)
+static bool confidenceLessThan(const DetectEncodingInfo& lhs, const DetectEncodingInfo& rhs)
 {
     return lhs.nConfidence < rhs.nConfidence;
 }
@@ -49,8 +48,7 @@ static QString hresultToQString(HRESULT hres)
 
 static AbstractCharsetDetector::Error toDetectionError(HRESULT error)
 {
-    return AbstractCharsetDetector::Error(
-                static_cast<int64_t>(error), hresultToQString(error));
+    return AbstractCharsetDetector::Error(static_cast<int64_t>(error), hresultToQString(error));
 }
 
 } // namespace Internal
@@ -75,6 +73,7 @@ WinIMultiLanguageCharsetDetector::~WinIMultiLanguageCharsetDetector()
 {
     if (m_multiLang != nullptr)
         m_multiLang->Release();
+
     CoUninitialize();
 }
 
@@ -88,8 +87,7 @@ void WinIMultiLanguageCharsetDetector::init()
     m_detectedEncodingName.clear();
 }
 
-bool WinIMultiLanguageCharsetDetector::handleData(
-        const QByteArray &buffer, Error *error)
+bool WinIMultiLanguageCharsetDetector::handleData(const QByteArray &buffer, Error *error)
 {
 #ifdef Q_OS_WIN
     if (m_multiLang != nullptr) {
