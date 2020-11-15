@@ -30,8 +30,7 @@ HEADERS += \
     src/file_charset_encoding_task.h \
     src/dir_iteration_task.h \
     src/abstract_charset_detector.h \
-    src/mozilla_universal_charset_detector.h \
-    src/win_imulti_language_charset_detector.h
+    src/mozilla_universal_charset_detector.h
 
 SOURCES += \
     src/main.cpp \
@@ -46,8 +45,7 @@ SOURCES += \
     src/file_charset_encoding_task.cpp \
     src/dir_iteration_task.cpp \
     src/abstract_charset_detector.cpp \
-    src/mozilla_universal_charset_detector.cpp \
-    src/win_imulti_language_charset_detector.cpp
+    src/mozilla_universal_charset_detector.cpp
 
 FORMS += \
     src/charset_tool_main_window.ui \
@@ -58,6 +56,8 @@ FORMS += \
 RESOURCES += charset-tool.qrc
 
 win32 {
+    HEADERS += src/win_imulti_language_charset_detector.h
+    SOURCES += src/win_imulti_language_charset_detector.cpp
     QMAKE_SUBSTITUTES += env_win.bat.in
     LIBS += -lole32 -lShlwapi
 }
