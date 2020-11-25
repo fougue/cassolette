@@ -1,7 +1,7 @@
 /****************************************************************************
-** CharSet Tool
+** Cassolette
 ** Copyright Fougue Ltd. (15 Apr. 2014)
-** contact@fougsys.fr
+** contact@fougue.pro
 **
 ** This software is a computer program whose purpose is to analyse and convert
 ** the encoding of text files.

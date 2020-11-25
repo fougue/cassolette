@@ -3,7 +3,7 @@ TEMPLATE = app
 QT     += widgets concurrent
 CONFIG += c++11
 
-TARGET = charset-tool
+TARGET = cassolette
 CONFIG(debug, debug|release) {
     TARGET = $$join(TARGET, , , _d)
 } else {
@@ -19,41 +19,41 @@ contains(QT_ARCH, i386) {
 INCLUDEPATH += src src/3rdparty
 
 HEADERS += \
-    src/charset_tool_main_window.h \
-    src/select_charset_dialog.h \
+    src/abstract_charset_detector.h \
     src/base_file_task.h \
-    src/progress_dialog.h \
-    src/log_widget.h \
+    src/cassolette_main_window.h \
     src/composite_file_task.h \
+    src/dir_iteration_task.h \
     src/editable_list_widget.h \
     src/file_charset_detection_task.h \
     src/file_charset_encoding_task.h \
-    src/dir_iteration_task.h \
-    src/abstract_charset_detector.h \
-    src/mozilla_universal_charset_detector.h
+    src/log_widget.h \
+    src/mozilla_universal_charset_detector.h \
+    src/progress_dialog.h \
+    src/select_charset_dialog.h \
 
 SOURCES += \
-    src/main.cpp \
-    src/charset_tool_main_window.cpp \
-    src/select_charset_dialog.cpp \
+    src/abstract_charset_detector.cpp \
     src/base_file_task.cpp \
-    src/progress_dialog.cpp \
-    src/log_widget.cpp \
+    src/cassolette_main_window.cpp \
     src/composite_file_task.cpp \
+    src/dir_iteration_task.cpp \
     src/editable_list_widget.cpp \
     src/file_charset_detection_task.cpp \
     src/file_charset_encoding_task.cpp \
-    src/dir_iteration_task.cpp \
-    src/abstract_charset_detector.cpp \
-    src/mozilla_universal_charset_detector.cpp
+    src/log_widget.cpp \
+    src/main.cpp \
+    src/mozilla_universal_charset_detector.cpp \
+    src/progress_dialog.cpp \
+    src/select_charset_dialog.cpp \
 
 FORMS += \
-    src/charset_tool_main_window.ui \
-    src/select_charset_dialog.ui \
+    src/cassolette_main_window.ui \
+    src/log_widget.ui \
     src/progress_dialog.ui \
-    src/log_widget.ui
+    src/select_charset_dialog.ui \
 
-RESOURCES += charset-tool.qrc
+RESOURCES += cassolette.qrc
 
 win32 {
     HEADERS += src/win_imulti_language_charset_detector.h

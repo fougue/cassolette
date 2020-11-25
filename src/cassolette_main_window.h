@@ -1,7 +1,7 @@
 /****************************************************************************
-** CharSet Tool
+** Cassolette
 ** Copyright Fougue Ltd. (15 Apr. 2014)
-** contact@fougsys.fr
+** contact@fougue.pro
 **
 ** This software is a computer program whose purpose is to analyse and convert
 ** the encoding of text files.
@@ -25,12 +25,12 @@ class ProgressDialog;
 #include <QtWidgets/QMainWindow>
 class QTreeWidgetItem;
 
-class CharsetToolMainWindow : public QMainWindow {
+class CassoletteMainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    CharsetToolMainWindow(QWidget *parent = nullptr);
-    ~CharsetToolMainWindow();
+    CassoletteMainWindow(QWidget *parent = nullptr);
+    ~CassoletteMainWindow();
 
 private slots:
     void addInputFiles();
@@ -69,7 +69,7 @@ private:
     void incrementTaskProgress(int amount = 1);
     void onTaskEnded();
 
-    class Ui_CharsetToolMainWindow *m_ui;
+    class Ui_CassoletteMainWindow* m_ui;
     QString m_lastInputDir;
     ProgressDialog* m_taskProgressDialog;
 

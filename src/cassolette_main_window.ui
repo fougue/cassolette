@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CharsetToolMainWindow</class>
- <widget class="QMainWindow" name="CharsetToolMainWindow">
+ <class>CassoletteMainWindow</class>
+ <widget class="QMainWindow" name="CassoletteMainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Charset Tool</string>
+   <string>Cassolette</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -72,7 +72,7 @@
               <string>...</string>
              </property>
              <property name="icon">
-              <iconset resource="../charset-tool.qrc">
+              <iconset>
                <normaloff>:/images/document-new.png</normaloff>:/images/document-new.png</iconset>
              </property>
              <property name="iconSize">
@@ -92,7 +92,7 @@
               <string>...</string>
              </property>
              <property name="icon">
-              <iconset resource="../charset-tool.qrc">
+              <iconset>
                <normaloff>:/images/folder-new.png</normaloff>:/images/folder-new.png</iconset>
              </property>
              <property name="iconSize">
@@ -199,7 +199,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="../charset-tool.qrc">
+            <iconset>
              <normaloff>:/images/document-edit-verify.png</normaloff>:/images/document-edit-verify.png</iconset>
            </property>
            <property name="iconSize">
@@ -219,7 +219,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="../charset-tool.qrc">
+            <iconset>
              <normaloff>:/images/run-build-file.png</normaloff>:/images/run-build-file.png</iconset>
            </property>
            <property name="iconSize">
@@ -324,8 +324,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../charset-tool.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

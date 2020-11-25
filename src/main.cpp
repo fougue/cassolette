@@ -1,7 +1,7 @@
 /****************************************************************************
-** CharSet Tool
+** Cassolette
 ** Copyright Fougue Ltd. (15 Apr. 2014)
-** contact@fougsys.fr
+** contact@fougue.pro
 **
 ** This software is a computer program whose purpose is to analyse and convert
 ** the encoding of text files.
@@ -15,7 +15,7 @@
 
 #include <QtWidgets/QApplication>
 
-#include "charset_tool_main_window.h"
+#include "cassolette_main_window.h"
 
 int main(int argc, char** argv)
 {
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     QCoreApplication::setApplicationName(QLatin1String("charset-tool"));
     //QCoreApplication::setApplicationVersion(versionNumber);
 
-    CharsetToolMainWindow mainWin;
+    CassoletteMainWindow mainWin;
     mainWin.show();
 
     return app.exec();

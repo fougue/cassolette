@@ -2,7 +2,7 @@
 **
 **  FougTools
 **  Copyright FougSys (1 Mar. 2011)
-**  contact@fougsys.fr
+**  contact@fougue.pro
 **
 ** This software is a computer program whose purpose is to provide utility
 ** tools for the C++ language and the Qt toolkit.
